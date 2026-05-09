@@ -1,0 +1,2601 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IA WhatsApp Trainer Pro — Treinamento Profissional</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+/* ─────────────────────────────────────────
+   DESIGN TOKENS — Apple-inspired Purple
+───────────────────────────────────────── */
+:root {
+  --p50:  #faf5ff;
+  --p100: #f3e8ff;
+  --p200: #e9d5ff;
+  --p300: #d8b4fe;
+  --p400: #c084fc;
+  --p500: #a855f7;
+  --p600: #9333ea;
+  --p700: #7e22ce;
+  --p800: #6b21a8;
+  --p900: #581c87;
+
+  --bg:       #080810;
+  --bg2:      #0d0d1a;
+  --bg3:      #111127;
+  --surface:  #13132a;
+  --surface2: #1a1a35;
+  --surface3: #20203f;
+  --border:   rgba(168,85,247,0.12);
+  --border2:  rgba(168,85,247,0.22);
+  --border3:  rgba(168,85,247,0.4);
+
+  --text:     #f0eaff;
+  --text2:    #b8aed4;
+  --text3:    #7a6fa0;
+
+  --accent:   #a855f7;
+  --accent2:  #c084fc;
+  --accent3:  #7c3aed;
+  --glow:     rgba(168,85,247,0.25);
+  --glow2:    rgba(168,85,247,0.08);
+
+  --white:    #ffffff;
+  --radius:   16px;
+  --radius-sm:10px;
+  --radius-lg:24px;
+
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─────────────────────────────────────────
+   RESET & BASE
+───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: 'Outfit', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─────────────────────────────────────────
+   AMBIENT BACKGROUND MESH
+───────────────────────────────────────── */
+.bg-mesh {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none; overflow: hidden;
+}
+.bg-mesh::before {
+  content: '';
+  position: absolute;
+  width: 900px; height: 900px;
+  background: radial-gradient(circle, rgba(124,58,237,0.18) 0%, rgba(168,85,247,0.06) 40%, transparent 70%);
+  top: -200px; left: -200px;
+  animation: orb-drift-a 20s ease-in-out infinite alternate;
+}
+.bg-mesh::after {
+  content: '';
+  position: absolute;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(192,132,252,0.12) 0%, transparent 65%);
+  bottom: -150px; right: -150px;
+  animation: orb-drift-b 25s ease-in-out infinite alternate;
+}
+.bg-mesh-mid {
+  position: fixed; z-index: 0; pointer-events: none;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(139,92,246,0.1) 0%, transparent 60%);
+  top: 40%; left: 50%; transform: translate(-50%, -50%);
+  animation: orb-pulse 8s ease-in-out infinite;
+}
+@keyframes orb-drift-a {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(120px, 80px) scale(1.15); }
+}
+@keyframes orb-drift-b {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-80px, -100px) scale(1.1); }
+}
+@keyframes orb-pulse {
+  0%, 100% { opacity: 0.5; transform: translate(-50%,-50%) scale(1); }
+  50%       { opacity: 1;   transform: translate(-50%,-50%) scale(1.2); }
+}
+
+/* Grain texture overlay */
+.grain {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+}
+
+/* ─────────────────────────────────────────
+   KEYFRAMES
+───────────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes border-glow {
+  0%, 100% { border-color: rgba(168,85,247,0.2); box-shadow: 0 0 0 rgba(168,85,247,0); }
+  50%       { border-color: rgba(168,85,247,0.5); box-shadow: 0 0 24px rgba(168,85,247,0.15); }
+}
+@keyframes progress-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+/* ─────────────────────────────────────────
+   SVG ICON SYSTEM
+───────────────────────────────────────── */
+.icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.icon svg { display: block; }
+
+/* ─────────────────────────────────────────
+   HERO SECTION
+───────────────────────────────────────── */
+#hero-section {
+  position: relative; z-index: 2;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 80px 24px 60px;
+  text-align: center;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(168,85,247,0.1);
+  border: 1px solid var(--border2);
+  border-radius: 100px;
+  padding: 7px 20px;
+  font-size: 12px; font-weight: 600;
+  color: var(--accent2);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  margin-bottom: 40px;
+  animation: fade-up 0.7s var(--ease-spring) both;
+  backdrop-filter: blur(8px);
+}
+.hero-badge-dot {
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: orb-pulse 2s ease-in-out infinite;
+}
+
+.hero-eyebrow {
+  font-size: 13px; font-weight: 500;
+  color: var(--text3); letter-spacing: 0.12em;
+  text-transform: uppercase; margin-bottom: 20px;
+  animation: fade-up 0.7s 0.05s var(--ease-spring) both;
+}
+
+.hero-title {
+  font-size: clamp(44px, 7vw, 88px);
+  font-weight: 900; line-height: 1.0;
+  color: var(--white);
+  margin-bottom: 28px;
+  animation: fade-up 0.7s 0.1s var(--ease-spring) both;
+  letter-spacing: -0.03em;
+}
+.hero-title .gradient-text {
+  background: linear-gradient(135deg, #c084fc 0%, #a855f7 35%, #7c3aed 70%, #c084fc 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+.hero-sub {
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--text2); max-width: 560px;
+  line-height: 1.7; font-weight: 400;
+  margin: 0 auto 20px;
+  animation: fade-up 0.7s 0.15s var(--ease-spring) both;
+}
+
+.hero-notice {
+  display: inline-flex; align-items: flex-start; gap: 12px;
+  background: rgba(168,85,247,0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 22px; max-width: 600px;
+  text-align: left; margin-bottom: 52px;
+  animation: fade-up 0.7s 0.2s var(--ease-spring) both;
+  backdrop-filter: blur(10px);
+}
+.hero-notice-icon { margin-top: 2px; flex-shrink: 0; }
+.hero-notice-text { font-size: 14px; color: var(--text2); line-height: 1.6; }
+.hero-notice-text strong { color: var(--accent2); font-weight: 600; }
+
+/* ─────────────────────────────────────────
+   NICHO GRID
+───────────────────────────────────────── */
+.nicho-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px; max-width: 940px; width: 100%;
+  animation: fade-up 0.7s 0.25s var(--ease-spring) both;
+  margin-bottom: 48px;
+}
+@media (max-width: 640px) { .nicho-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 380px) { .nicho-grid { grid-template-columns: 1fr; } }
+
+.nicho-card {
+  position: relative; overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 20px 22px;
+  cursor: pointer;
+  transition: transform 0.3s var(--ease-spring),
+              border-color 0.3s var(--ease-smooth),
+              box-shadow 0.3s var(--ease-smooth),
+              background 0.3s var(--ease-smooth);
+  text-align: left;
+  backdrop-filter: blur(12px);
+}
+.nicho-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(168,85,247,0.1) 0%, transparent 60%);
+  opacity: 0; transition: opacity 0.4s;
+}
+.nicho-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(168,85,247,0.6), transparent);
+  opacity: 0; transition: opacity 0.4s;
+}
+.nicho-card:hover { transform: translateY(-5px) scale(1.01); border-color: var(--border3); box-shadow: 0 16px 48px rgba(168,85,247,0.2); }
+.nicho-card:hover::before { opacity: 1; }
+.nicho-card:hover::after  { opacity: 1; }
+.nicho-card.active {
+  border-color: var(--accent);
+  background: rgba(168,85,247,0.08);
+  box-shadow: 0 0 0 1px rgba(168,85,247,0.3), 0 12px 40px rgba(168,85,247,0.2);
+  animation: border-glow 3s ease-in-out infinite;
+}
+.nicho-card.active::before { opacity: 1; }
+.nicho-card.active::after  { opacity: 1; }
+
+.nicho-icon-wrap {
+  width: 44px; height: 44px;
+  background: rgba(168,85,247,0.1);
+  border: 1px solid rgba(168,85,247,0.2);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+  transition: background 0.3s, transform 0.3s var(--ease-spring);
+}
+.nicho-card:hover .nicho-icon-wrap { background: rgba(168,85,247,0.2); transform: scale(1.1); }
+.nicho-card.active .nicho-icon-wrap { background: rgba(168,85,247,0.2); }
+
+.nicho-name {
+  font-size: 15px; font-weight: 700;
+  color: var(--text); letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.nicho-desc {
+  font-size: 12px; color: var(--text3);
+  margin-top: 4px; font-weight: 400;
+}
+.nicho-check {
+  position: absolute; top: 14px; right: 14px;
+  width: 22px; height: 22px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transform: scale(0);
+  transition: opacity 0.3s, transform 0.3s var(--ease-spring);
+}
+.nicho-card.active .nicho-check { opacity: 1; transform: scale(1); }
+
+/* ─────────────────────────────────────────
+   CTA BUTTON
+───────────────────────────────────────── */
+.hero-cta {
+  animation: fade-up 0.7s 0.35s var(--ease-spring) both;
+}
+.btn-hero {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, var(--p600) 0%, var(--p500) 50%, var(--p400) 100%);
+  background-size: 200% auto;
+  color: var(--white);
+  font-family: 'Outfit', sans-serif;
+  font-size: 17px; font-weight: 700;
+  padding: 18px 40px;
+  border-radius: 100px; border: none;
+  cursor: pointer;
+  transition: transform 0.3s var(--ease-spring), box-shadow 0.3s, background-position 0.4s;
+  box-shadow: 0 8px 32px rgba(168,85,247,0.4), 0 0 0 1px rgba(255,255,255,0.1) inset;
+  letter-spacing: -0.01em;
+  animation: shimmer 3s linear infinite;
+}
+.btn-hero:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 16px 48px rgba(168,85,247,0.5), 0 0 0 1px rgba(255,255,255,0.15) inset;
+}
+.btn-hero:active { transform: translateY(0) scale(0.99); }
+
+/* ─────────────────────────────────────────
+   APP LAYOUT
+───────────────────────────────────────── */
+#app { display: none; }
+#app.visible { display: block; animation: fade-in 0.5s var(--ease-smooth); }
+
+/* ─────────────────────────────────────────
+   TOP NAV
+───────────────────────────────────────── */
+.top-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(8,8,16,0.85);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  font-size: 19px; font-weight: 800;
+  color: var(--white); letter-spacing: -0.03em;
+  display: flex; align-items: center; gap: 10px;
+}
+.nav-logo-mark {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--p600), var(--p400));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px rgba(168,85,247,0.4);
+}
+.nav-nicho-tag {
+  font-size: 12px; font-weight: 600;
+  background: rgba(168,85,247,0.12);
+  border: 1px solid var(--border2);
+  border-radius: 100px; padding: 4px 14px;
+  color: var(--accent2); letter-spacing: 0.04em;
+}
+.btn-nav-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: transparent; border: 1px solid var(--border2);
+  border-radius: 100px; padding: 8px 16px;
+  color: var(--text2); font-size: 13px; font-weight: 500;
+  cursor: pointer; font-family: 'Outfit', sans-serif;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.btn-nav-back:hover { border-color: var(--accent); color: var(--accent2); background: rgba(168,85,247,0.06); }
+
+/* ─────────────────────────────────────────
+   APP CONTAINER
+───────────────────────────────────────── */
+.app-container {
+  position: relative; z-index: 2;
+  max-width: 1100px; margin: 0 auto;
+  padding: 40px 28px 100px;
+}
+
+/* ─────────────────────────────────────────
+   PROGRESS BAR
+───────────────────────────────────────── */
+.progress-section { margin-bottom: 40px; }
+.progress-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+}
+.progress-label { font-size: 13px; color: var(--text3); font-weight: 500; letter-spacing: 0.04em; }
+.progress-pct {
+  font-size: 13px; font-weight: 700; color: var(--accent2);
+  font-family: 'DM Mono', monospace;
+}
+.progress-track {
+  height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden;
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--p700), var(--p500), var(--p400));
+  border-radius: 2px;
+  transition: width 0.6s var(--ease-smooth);
+  position: relative;
+}
+.progress-fill::after {
+  content: '';
+  position: absolute; top: 0; right: 0; bottom: 0;
+  width: 40px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4));
+  animation: shimmer 1.5s linear infinite;
+}
+
+/* ─────────────────────────────────────────
+   STEP PILLS
+───────────────────────────────────────── */
+.steps-bar {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 44px;
+}
+.step-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 100px;
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.03em;
+  border: 1px solid var(--border);
+  color: var(--text3); background: transparent;
+  cursor: pointer; font-family: 'Outfit', sans-serif;
+  transition: all 0.25s var(--ease-smooth);
+  white-space: nowrap;
+}
+.step-pill:hover:not(.active) { border-color: var(--border2); color: var(--text2); background: var(--surface); }
+.step-pill.active {
+  background: rgba(168,85,247,0.15);
+  border-color: var(--accent);
+  color: var(--accent2);
+  box-shadow: 0 0 16px rgba(168,85,247,0.15);
+}
+.step-pill .pill-num {
+  width: 18px; height: 18px;
+  background: rgba(168,85,247,0.2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+}
+.step-pill.active .pill-num { background: var(--accent); color: white; }
+
+/* ─────────────────────────────────────────
+   SECTION HEADER
+───────────────────────────────────────── */
+.section-header {
+  display: flex; align-items: center; gap: 18px;
+  margin-bottom: 36px; padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.section-icon-wrap {
+  width: 52px; height: 52px; flex-shrink: 0;
+  background: rgba(168,85,247,0.1);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.section-title {
+  font-size: 22px; font-weight: 800;
+  color: var(--white); letter-spacing: -0.02em;
+}
+.section-sub { font-size: 14px; color: var(--text3); margin-top: 4px; line-height: 1.5; }
+
+/* ─────────────────────────────────────────
+   CARDS
+───────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 30px;
+  margin-bottom: 20px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.3s;
+}
+.card:hover { border-color: var(--border2); }
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(168,85,247,0.3) 50%, transparent 100%);
+}
+
+.card-title {
+  font-size: 15px; font-weight: 700;
+  color: var(--text); letter-spacing: -0.01em;
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.card-tag {
+  background: rgba(168,85,247,0.1);
+  border: 1px solid var(--border2);
+  border-radius: 6px; padding: 2px 10px;
+  font-size: 10px; color: var(--accent2);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  font-weight: 700;
+}
+
+/* ─────────────────────────────────────────
+   FORM ELEMENTS
+───────────────────────────────────────── */
+label {
+  display: block; font-size: 12px; font-weight: 600;
+  color: var(--text3); margin-bottom: 8px; margin-top: 20px;
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+label:first-of-type { margin-top: 0; }
+
+input[type="text"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px; font-weight: 400;
+  padding: 13px 16px;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+  resize: vertical;
+  -webkit-appearance: none;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(168,85,247,0.12);
+}
+input::placeholder, textarea::placeholder { color: var(--text3); }
+textarea { min-height: 90px; line-height: 1.6; }
+select option { background: var(--surface2); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* ─────────────────────────────────────────
+   BUTTONS
+───────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 13px 26px; border-radius: var(--radius-sm);
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; border: none;
+  transition: all 0.25s var(--ease-spring);
+  letter-spacing: -0.01em; text-decoration: none;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--p600) 0%, var(--p500) 100%);
+  color: white;
+  box-shadow: 0 4px 20px rgba(168,85,247,0.35);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(168,85,247,0.5); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent2); background: rgba(168,85,247,0.06); }
+
+.btn-ghost {
+  background: rgba(168,85,247,0.08);
+  border: 1px solid var(--border2);
+  color: var(--accent2);
+}
+.btn-ghost:hover { background: rgba(168,85,247,0.15); }
+
+.btn-lg { padding: 17px 36px; font-size: 16px; border-radius: 100px; }
+
+.btn-generate {
+  width: 100%; justify-content: center;
+  background: linear-gradient(135deg, var(--p700) 0%, var(--p500) 50%, var(--p300) 100%);
+  background-size: 200% auto;
+  color: white; font-size: 17px; font-weight: 800;
+  padding: 20px 40px; border-radius: 100px;
+  border: none; cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: -0.02em;
+  box-shadow: 0 8px 36px rgba(168,85,247,0.4), 0 0 0 1px rgba(255,255,255,0.08) inset;
+  transition: transform 0.3s var(--ease-spring), box-shadow 0.3s;
+  animation: shimmer 4s linear infinite;
+}
+.btn-generate:hover { transform: translateY(-3px); box-shadow: 0 14px 44px rgba(168,85,247,0.55); }
+
+/* ─────────────────────────────────────────
+   INFO / WARN BOXES
+───────────────────────────────────────── */
+.info-box {
+  display: flex; gap: 12px;
+  background: rgba(168,85,247,0.05);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px; margin: 16px 0;
+  font-size: 14px; color: var(--text2); line-height: 1.65;
+}
+.warn-box {
+  display: flex; gap: 12px;
+  background: rgba(239,68,68,0.05);
+  border: 1px solid rgba(239,68,68,0.15);
+  border-left: 3px solid #ef4444;
+  border-radius: var(--radius-sm);
+  padding: 16px 18px; margin: 16px 0;
+  font-size: 14px; color: #fca5a5; line-height: 1.65;
+}
+
+/* ─────────────────────────────────────────
+   CHIPS / TAGS
+───────────────────────────────────────── */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.chip {
+  padding: 5px 13px; border-radius: 100px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.03em;
+  border: 1px solid; cursor: default;
+}
+.chip-purple { background: rgba(168,85,247,0.1); border-color: rgba(168,85,247,0.25); color: var(--accent2); }
+.chip-blue   { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.25); color: #93c5fd; }
+.chip-pink   { background: rgba(236,72,153,0.1); border-color: rgba(236,72,153,0.25); color: #f9a8d4; }
+.chip-teal   { background: rgba(20,184,166,0.1); border-color: rgba(20,184,166,0.25); color: #5eead4; }
+.chip-red    { background: rgba(239,68,68,0.1);  border-color: rgba(239,68,68,0.25);  color: #fca5a5; }
+
+/* ─────────────────────────────────────────
+   FAQ ACCORDION
+───────────────────────────────────────── */
+.faq-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px; overflow: hidden;
+  transition: border-color 0.25s;
+}
+.faq-item:hover { border-color: var(--border2); }
+.faq-item.open  { border-color: var(--border3); }
+
+.faq-q {
+  padding: 16px 20px; cursor: pointer;
+  font-weight: 500; font-size: 14px; color: var(--text);
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; user-select: none;
+  transition: background 0.2s;
+}
+.faq-q:hover { background: rgba(168,85,247,0.03); }
+.faq-num {
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  font-family: 'DM Mono', monospace; flex-shrink: 0;
+}
+.faq-arrow {
+  flex-shrink: 0; color: var(--text3);
+  transition: transform 0.35s var(--ease-spring), color 0.2s;
+}
+.faq-item.open .faq-arrow { transform: rotate(180deg); color: var(--accent); }
+
+.faq-a {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.4s var(--ease-smooth), padding 0.3s;
+  padding: 0 20px;
+}
+.faq-a textarea {
+  width: 100%; min-height: 70px; margin-top: 0; margin-bottom: 0;
+  font-size: 13px;
+}
+.faq-item.open .faq-a { max-height: 300px; padding: 4px 20px 18px; }
+
+/* ─────────────────────────────────────────
+   CHAT SIMULATION
+───────────────────────────────────────── */
+.chat-sim {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.chat-sim-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.chat-sim-avatar {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--p600), var(--p400));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.chat-sim-title {
+  font-size: 13px; font-weight: 700; color: var(--text);
+}
+.chat-sim-sub {
+  font-size: 11px; color: var(--text3); margin-top: 1px;
+}
+.chat-sim-body { padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+
+.chat-msg { display: flex; gap: 10px; }
+.chat-msg.user { justify-content: flex-end; }
+.chat-msg.ai   { justify-content: flex-start; }
+
+.chat-avatar-sm {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+.chat-msg.ai .chat-avatar-sm {
+  background: linear-gradient(135deg, var(--p700), var(--p500));
+}
+.chat-msg.user .chat-avatar-sm {
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  order: 2;
+}
+
+.chat-content { max-width: 72%; }
+.chat-label { font-size: 10px; font-weight: 700; color: var(--text3); margin-bottom: 5px; letter-spacing: 0.06em; text-transform: uppercase; }
+.chat-msg.user .chat-label { text-align: right; }
+
+.chat-bubble {
+  padding: 12px 16px; font-size: 14px; line-height: 1.6; border-radius: 18px;
+}
+.chat-msg.user .chat-bubble {
+  background: linear-gradient(135deg, var(--p700) 0%, var(--p500) 100%);
+  color: white; border-bottom-right-radius: 4px;
+}
+.chat-msg.ai .chat-bubble {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+
+/* ─────────────────────────────────────────
+   PROMPT OUTPUT
+───────────────────────────────────────── */
+.prompt-output-wrap { display: none; margin-top: 24px; }
+.prompt-output-wrap.visible { display: block; animation: scale-in 0.4s var(--ease-spring); }
+
+.prompt-output-header {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-bottom: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 14px 20px;
+}
+.prompt-output-dots { display: flex; gap: 7px; }
+.prompt-dot { width: 12px; height: 12px; border-radius: 50%; }
+.prompt-dot:nth-child(1) { background: #ff5f57; }
+.prompt-dot:nth-child(2) { background: #febc2e; }
+.prompt-dot:nth-child(3) { background: #28c840; }
+.prompt-output-label { font-size: 12px; font-weight: 600; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+#prompt-output {
+  background: #05050f;
+  border: 1px solid var(--border2);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 28px 28px;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px; line-height: 1.9;
+  color: #c4b5fd;
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 560px; overflow-y: auto;
+}
+#prompt-output::-webkit-scrollbar { width: 5px; }
+#prompt-output::-webkit-scrollbar-track { background: transparent; }
+#prompt-output::-webkit-scrollbar-thumb { background: var(--p700); border-radius: 3px; }
+
+.copy-bar { display: flex; gap: 12px; margin-top: 16px; justify-content: flex-end; }
+
+/* ─────────────────────────────────────────
+   STEP SECTIONS
+───────────────────────────────────────── */
+.step-section { display: none; }
+.step-section.active { display: block; animation: fade-up 0.4s var(--ease-spring); }
+
+/* ─────────────────────────────────────────
+   DIVIDER
+───────────────────────────────────────── */
+.divider { height: 1px; background: var(--border); margin: 32px 0; }
+
+/* ─────────────────────────────────────────
+   NAV ACTIONS (step buttons)
+───────────────────────────────────────── */
+.step-actions {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-top: 36px;
+  padding-top: 28px; border-top: 1px solid var(--border);
+}
+.step-actions.end { justify-content: flex-start; }
+
+/* ─────────────────────────────────────────
+   TOAST
+───────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 32px; right: 32px; z-index: 1000;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 14px 22px;
+  font-size: 14px; color: var(--text);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(168,85,247,0.1);
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.4s var(--ease-spring);
+  display: flex; align-items: center; gap: 10px;
+  backdrop-filter: blur(16px);
+  min-width: 240px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-icon-wrap {
+  width: 28px; height: 28px;
+  background: rgba(168,85,247,0.15);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+@media (max-width: 768px) {
+  .app-container { padding: 24px 16px 80px; }
+  .card { padding: 20px; }
+  .chat-sim-body { padding: 16px; }
+  .top-nav { padding: 0 16px; }
+  .steps-bar { gap: 5px; }
+  .step-pill { padding: 6px 11px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+<div class="bg-mesh-mid"></div>
+<div class="grain"></div>
+
+<!-- ══════════════════════════════════════════
+     SVG ICON DEFS (inline sprite)
+══════════════════════════════════════════ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="ic-bot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="3"/><path d="M12 11V7"/><circle cx="12" cy="5" r="2"/><path d="M8 15h.01M16 15h.01M8 19h8"/>
+  </symbol>
+  <symbol id="ic-whatsapp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+  </symbol>
+  <symbol id="ic-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4M9 9h.01M15 9h.01M9 13h.01M15 13h.01"/>
+  </symbol>
+  <symbol id="ic-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/><path d="M5 3v2M3 5h2M19 17v2M17 19h2"/>
+  </symbol>
+  <symbol id="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+  </symbol>
+  <symbol id="ic-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+  </symbol>
+  <symbol id="ic-pizza" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 2a10 10 0 0 0-10 10l10 10 10-10"/><circle cx="12" cy="12" r="2"/><path d="M7 13h.01M13 7h.01"/>
+  </symbol>
+  <symbol id="ic-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+  </symbol>
+  <symbol id="ic-face" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>
+  </symbol>
+  <symbol id="ic-building2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 7h.01M15 7h.01M9 11h.01M15 11h.01M9 15h.01M15 15h.01M9 19h6"/>
+  </symbol>
+  <symbol id="ic-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </symbol>
+  <symbol id="ic-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </symbol>
+  <symbol id="ic-question" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/>
+  </symbol>
+  <symbol id="ic-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16"/>
+  </symbol>
+  <symbol id="ic-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 3a3 3 0 0 0-3 3 3 3 0 0 0-3 3 3 3 0 0 0 3 3v6h6V6a3 3 0 0 0-3-3z"/><path d="M15 3a3 3 0 0 1 3 3 3 3 0 0 1 3 3 3 3 0 0 1-3 3v6h-6V6a3 3 0 0 1 3-3z"/>
+  </symbol>
+  <symbol id="ic-ban" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+  </symbol>
+  <symbol id="ic-rocket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M15 12v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+  </symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20,6 9,17 4,12"/>
+  </symbol>
+  <symbol id="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+  </symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/>
+  </symbol>
+  <symbol id="ic-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/>
+  </symbol>
+  <symbol id="ic-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/>
+  </symbol>
+  <symbol id="ic-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="6,9 12,15 18,9"/>
+  </symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+  </symbol>
+  <symbol id="ic-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+  </symbol>
+  <symbol id="ic-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+  </symbol>
+  <symbol id="ic-gavel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m14 13-8.5 8.5a2.12 2.12 0 0 1-3-3L11 10"/><path d="m16 16 6-6"/><path d="m8 8 6-6"/><line x1="20" y1="9" x2="13" y2="2"/><line x1="6" y1="15" x2="2" y2="19"/>
+  </symbol>
+  <symbol id="ic-tooth" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 5.5C10 3 7 3 5.5 5S4 10 5 12c.5 2 1 4 2 6 .5 1.5 1.5 2 2.5 1s1.5-2 2.5-2 1.5 1 2.5 2 2 .5 2.5-1c1-2 1.5-4 2-6 1-2 .5-5.5-1-7S14 3 12 5.5z"/>
+  </symbol>
+  <symbol id="ic-dumbbell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/>
+  </symbol>
+  <symbol id="ic-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
+  </symbol>
+</svg>
+
+<!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<section id="hero-section">
+  <div class="hero-badge">
+    <div class="hero-badge-dot"></div>
+    IA WhatsApp Trainer Pro &nbsp;·&nbsp; v2.0
+  </div>
+
+  <p class="hero-eyebrow">Plataforma de Treinamento Inteligente</p>
+
+  <h1 class="hero-title">
+    Treine sua IA de<br/>
+    <span class="gradient-text">Atendimento</span><br/>
+    em minutos
+  </h1>
+
+  <p class="hero-sub">
+    Gere um prompt de treinamento completo e profissional para sua IA de WhatsApp. Selecione o nicho da sua empresa e começamos.
+  </p>
+
+  <div class="hero-notice">
+    <div class="hero-notice-icon">
+      <svg class="icon" width="18" height="18" style="color:var(--accent2)"><use href="#ic-zap"/></svg>
+    </div>
+    <div class="hero-notice-text">
+      <strong>Nichos disponíveis nesta versão:</strong><br/>
+      Imobiliárias · Clínicas Estéticas · Energia Solar · Seguros &amp; Consórcio · Restaurantes Delivery · Oficinas Mecânicas · Advocacia · Odontologia · Academia &amp; Personal.
+      <br/><span style="font-size:12px;opacity:0.6;">Selecione seu nicho abaixo para acessar o treinamento completo e personalizado.</span>
+    </div>
+  </div>
+
+  <div class="nicho-grid">
+    <div class="nicho-card" onclick="selectNicho('imoveis')" id="n-imoveis">
+      <div class="nicho-icon-wrap">
+        <svg width="22" height="22" style="color:var(--accent2)"><use href="#ic-building"/></svg>
+      </div>
+      <div class="nicho-name">Imobiliária</div>
+      <div class="nicho-desc">Venda, locação &amp; consultoria</div>
+      <div class="nicho-check">
+        <svg width="11" height="11" style="color:white"><use href="#ic-check"/></svg>
+      </div>
+    </div>
+    <div class="nicho-card" onclick="selectNicho('estetica')" id="n-estetica">
+      <div class="nicho-icon-wrap">
+        <svg width="22" height="22" style="color:var(--accent2)"><use href="#ic-face"/></svg>
+      </div>
+      <div class="nicho-name">Clínica Estética</div>
+      <div class="nicho-desc">Estética, harmonização &amp; bem-estar</div>
+      <div class="nicho-check">
+        <svg width="11" height="11" style="color:white"><use href="#ic-check"/></svg>
+      </div>
+    </div>
+    <div class="nicho-card" onclick="selectNicho('solar')" id="n-solar">
+      <div class="nicho-icon-wrap">
+        <svg width="22" height="22" style="color:var(--accent2)"><use href="#ic-sun"/></svg>
+      </div>
+      <div class="nicho-name">Energia Solar</div>
+      <div class="nicho-desc">Instalação, projetos &amp; economia</div>
+      <div class="nicho-check">
+        <svg width="11" height="11" style="color:white"><use href="#ic-check"/></svg>
+      </div>
+    </div>
+    <div class="nicho-card" onclick="selectNicho('seguros')" id="n-seguros">
+      <div class="nicho-icon-wrap">
+        <svg width="22" height="22" style="color:var(--accent2)"><use href="#ic-shield"/></svg>
+      </div>
+      <div class="nicho-name">Seguros &amp; Consórcio</div>
+      <div class="nicho-desc">Proteção, previdência &amp; planejamento</div>
+      <div class="nicho-check">
+        <svg width="11" height="11" style="color:white"><use href="#ic-check"/></svg>
+      </div>
+    </div>
+    <div class="nicho-card" onclick="selectNicho('delivery')" id="n-delivery">
+      <div class="nicho-icon-wrap">
+        <svg width="22" height="22" style="color:var(--accent2)"><use href="#ic-pizza"/></svg>
+      </div>
+      <div class="nicho-name">Restaurante Delivery</div>
+      <div class="nicho-desc">Pedidos, cardápio &amp; fidelização</div>
+      <div class="nicho-check">
+        <svg width="11" height="11" style="color:white"><use href="#ic-check"/></svg>
+      </div>
+    </div>
+    <div class="nicho-card" onclick="selectNicho('mecanica')" id="n-mecanica">
+      <div class="nicho-icon-wrap">
+        <svg width="22" height="22" style="color:var(--accent2)"><use href="#ic-wrench"/></svg>
+      </div>
+      <div class="nicho-name">Oficina Mecânica</div>
+      <div class="nicho-desc">Revisão, diagnóstico &amp; serviços</div>
+      <div class="nicho-check">
+        <svg width="11" height="11" style="color:white"><use href="#ic-check"/></svg>
+      </div>
+    </div>
+    <div class="nicho-card" onclick="selectNicho('advocacia')" id="n-advocacia">
+      <div class="nicho-icon-wrap">
+        <svg width="22" height="22" style="color:var(--accent2)"><use href="#ic-gavel"/></svg>
+      </div>
+      <div class="nicho-name">Advocacia</div>
+      <div class="nicho-desc">Direito, consultoria &amp; processos</div>
+      <div class="nicho-check">
+        <svg width="11" height="11" style="color:white"><use href="#ic-check"/></svg>
+      </div>
+    </div>
+    <div class="nicho-card" onclick="selectNicho('odonto')" id="n-odonto">
+      <div class="nicho-icon-wrap">
+        <svg width="22" height="22" style="color:var(--accent2)"><use href="#ic-tooth"/></svg>
+      </div>
+      <div class="nicho-name">Odontologia</div>
+      <div class="nicho-desc">Implantes, estética &amp; saúde bucal</div>
+      <div class="nicho-check">
+        <svg width="11" height="11" style="color:white"><use href="#ic-check"/></svg>
+      </div>
+    </div>
+    <div class="nicho-card" onclick="selectNicho('academia')" id="n-academia">
+      <div class="nicho-icon-wrap">
+        <svg width="22" height="22" style="color:var(--accent2)"><use href="#ic-dumbbell"/></svg>
+      </div>
+      <div class="nicho-name">Academia &amp; Personal</div>
+      <div class="nicho-desc">Treino, emagrecimento &amp; performance</div>
+      <div class="nicho-check">
+        <svg width="11" height="11" style="color:white"><use href="#ic-check"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-cta">
+    <button class="btn-hero" onclick="startApp()">
+      <svg width="20" height="20" style="color:white"><use href="#ic-rocket"/></svg>
+      Iniciar Treinamento
+    </button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- NAV -->
+  <nav class="top-nav">
+    <div class="nav-logo">
+      <div class="nav-logo-mark">
+        <svg width="18" height="18" style="color:white"><use href="#ic-bot"/></svg>
+      </div>
+      IA Trainer
+      <span class="nav-nicho-tag" id="nav-nicho-label">—</span>
+    </div>
+    <button class="btn-nav-back" onclick="goBack()">
+      <svg width="14" height="14"><use href="#ic-arrow-left"/></svg>
+      Trocar Nicho
+    </button>
+  </nav>
+
+  <div class="app-container">
+
+    <!-- PROGRESS -->
+    <div class="progress-section">
+      <div class="progress-meta">
+        <span class="progress-label">PROGRESSO DO TREINAMENTO</span>
+        <span class="progress-pct" id="progress-pct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- STEP PILLS -->
+    <div class="steps-bar">
+      <div class="step-pill active" onclick="goStep(0)" id="pill-0">
+        <span class="pill-num">1</span> Empresa
+      </div>
+      <div class="step-pill" onclick="goStep(1)" id="pill-1">
+        <span class="pill-num">2</span> Regras da IA
+      </div>
+      <div class="step-pill" onclick="goStep(2)" id="pill-2">
+        <span class="pill-num">3</span> Mensagens
+      </div>
+      <div class="step-pill" onclick="goStep(3)" id="pill-3">
+        <span class="pill-num">4</span> FAQ
+      </div>
+      <div class="step-pill" onclick="goStep(4)" id="pill-4">
+        <span class="pill-num">5</span> Simulações
+      </div>
+      <div class="step-pill" onclick="goStep(5)" id="pill-5">
+        <span class="pill-num">6</span> Técnicas
+      </div>
+      <div class="step-pill" onclick="goStep(6)" id="pill-6">
+        <span class="pill-num">7</span> Proibições
+      </div>
+      <div class="step-pill" onclick="goStep(7)" id="pill-7">
+        <span class="pill-num">8</span> Gerar Prompt
+      </div>
+    </div>
+
+    <!-- ── STEP 0: EMPRESA ── -->
+    <div class="step-section active" id="step-0">
+      <div class="section-header">
+        <div class="section-icon-wrap">
+          <svg width="24" height="24" style="color:var(--accent2)"><use href="#ic-building2"/></svg>
+        </div>
+        <div>
+          <div class="section-title">Apresentação da Empresa</div>
+          <div class="section-sub">Preencha os dados reais da sua empresa para personalizar o treinamento</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-building2"/></svg>
+          Dados Básicos
+          <span class="card-tag">Obrigatório</span>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label>Nome da Empresa</label>
+            <input type="text" id="f-nome" placeholder="Ex: Imobiliária Visão Premium" />
+          </div>
+          <div>
+            <label>Cidade / Estado</label>
+            <input type="text" id="f-cidade" placeholder="Ex: São Paulo / SP" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label>WhatsApp de Atendimento</label>
+            <input type="tel" id="f-whats" placeholder="(11) 99999-9999" />
+          </div>
+          <div>
+            <label>Site ou Instagram</label>
+            <input type="url" id="f-site" placeholder="www.suaempresa.com.br" />
+          </div>
+        </div>
+        <label>Horário de Atendimento Humano</label>
+        <input type="text" id="f-horario" placeholder="Ex: Seg a Sex das 8h às 18h · Sáb das 9h às 13h" />
+        <label>Nome do Responsável / Consultor que recebe os leads</label>
+        <input type="text" id="f-responsavel" placeholder="Ex: Lucas — Consultor Especialista" />
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-chat"/></svg>
+          Sobre a Empresa
+        </div>
+        <label>Descrição da Empresa (quem vocês são, história, missão)</label>
+        <textarea id="f-sobre" placeholder="Ex: A Visão Premium é uma imobiliária especializada em imóveis de alto padrão na Zona Sul de SP, com mais de 10 anos de mercado e mais de 800 famílias atendidas..."></textarea>
+        <label>Serviços / Produtos Oferecidos (liste todos)</label>
+        <textarea id="f-servicos" placeholder="Ex: Venda de imóveis residenciais, Locação, Administração de imóveis, Consultoria de investimento imobiliário..."></textarea>
+        <label>Diferenciais Competitivos (por que escolher vocês?)</label>
+        <textarea id="f-diferenciais" placeholder="Ex: Atendimento 24h via WhatsApp, equipe de 15 corretores especializados, 0% de taxa de administração no primeiro mês..."></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-sparkle"/></svg>
+          Tom de Comunicação
+        </div>
+        <label>Tom de Voz da Marca</label>
+        <select id="f-tom">
+          <option value="">Selecione...</option>
+          <option value="profissional_amigavel">Profissional e Amigável</option>
+          <option value="sofisticado">Sofisticado e Premium</option>
+          <option value="descontraido">Descontraído e Próximo</option>
+          <option value="tecnico">Técnico e Especializado</option>
+          <option value="urgente">Dinâmico e com Urgência</option>
+        </select>
+        <label>Nome que a IA deve usar ao se apresentar</label>
+        <input type="text" id="f-nome-ia" placeholder="Ex: Sofia · Assistente Virtual da Visão Premium" />
+        <label>Saudação Padrão Preferida</label>
+        <input type="text" id="f-saudacao" placeholder="Ex: Olá! Tudo bem? Aqui é a Sofia..." />
+      </div>
+
+      <div class="step-actions">
+        <div></div>
+        <button class="btn btn-primary" onclick="goStep(1)">
+          Próximo: Regras da IA
+          <svg width="16" height="16"><use href="#ic-arrow-right"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 1: REGRAS ── -->
+    <div class="step-section" id="step-1">
+      <div class="section-header">
+        <div class="section-icon-wrap">
+          <svg width="24" height="24" style="color:var(--accent2)"><use href="#ic-gear"/></svg>
+        </div>
+        <div>
+          <div class="section-title">Regras da IA</div>
+          <div class="section-sub">Defina o comportamento da IA em cada cenário de atendimento</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-ban"/></svg>
+          Quando Transferir para Humano
+        </div>
+        <label>Situações em que a IA deve chamar um atendente humano (uma por linha)</label>
+        <textarea id="r-transferir" rows="6" placeholder="- Cliente pedir para falar com um humano&#10;- Reclamação grave ou ameaça de processo&#10;- Negociação de desconto acima de 10%&#10;- Cliente demonstrar raiva extrema&#10;- Assunto fora do escopo do negócio&#10;- Pergunta jurídica ou contratual específica"></textarea>
+        <div class="info-box">
+          <svg width="16" height="16" style="color:var(--accent2);flex-shrink:0;margin-top:2px"><use href="#ic-info"/></svg>
+          <span>A IA deve sempre priorizar a experiência do cliente. Quando não souber responder algo com confiança, deve transferir com elegância e sem deixar o cliente esperando.</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-sparkle"/></svg>
+          Como Agir com Cliente Frio
+        </div>
+        <label>Sem interesse aparente — como despertar curiosidade</label>
+        <textarea id="r-frio" rows="4" placeholder="Ex: Enviar mensagem curta, não pressionar, fazer 1 pergunta aberta para descobrir a real necessidade, usar técnica de curiosidade, enviar conteúdo de valor sem cobrar retorno..."></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-zap"/></svg>
+          Como Agir com Cliente Interessado
+        </div>
+        <textarea id="r-interessado" rows="4" placeholder="Ex: Responder em menos de 30 segundos, identificar a necessidade exata, oferecer solução específica, criar urgência suave, convidar para reunião ou visita, enviar materiais de apoio..."></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:#f87171"><use href="#ic-alert"/></svg>
+          Como Agir com Cliente Irritado
+        </div>
+        <textarea id="r-irritado" rows="4" placeholder="Ex: Nunca rebater ou discutir, validar a emoção do cliente, pedir desculpas pelo inconveniente, transferir para humano, usar linguagem empática, não usar respostas genéricas..."></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-rocket"/></svg>
+          Como Conduzir ao Fechamento
+        </div>
+        <textarea id="r-fechamento" rows="4" placeholder="Ex: Identificar sinal de compra, fazer pergunta de comprometimento, criar senso de urgência real, oferecer facilidade de pagamento, propor próximo passo claro (visita, reunião, contrato)..."></textarea>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-secondary" onclick="goStep(0)">
+          <svg width="16" height="16"><use href="#ic-arrow-left"/></svg>
+          Anterior
+        </button>
+        <button class="btn btn-primary" onclick="goStep(2)">
+          Próximo: Mensagens
+          <svg width="16" height="16"><use href="#ic-arrow-right"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 2: MENSAGENS ── -->
+    <div class="step-section" id="step-2">
+      <div class="section-header">
+        <div class="section-icon-wrap">
+          <svg width="24" height="24" style="color:var(--accent2)"><use href="#ic-chat"/></svg>
+        </div>
+        <div>
+          <div class="section-title">Mensagens Prontas</div>
+          <div class="section-sub">Templates humanizados para cada etapa do atendimento</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-user"/></svg>
+          Saudação Inicial
+        </div>
+        <label>Mensagem 1 — Primeiro contato (horário comercial)</label>
+        <textarea id="m-saudacao1" rows="4" placeholder="Ex: Olá! Seja muito bem-vindo(a) à [EMPRESA]! Aqui é a [IA], assistente virtual especializada. Estou aqui para te ajudar com tudo que precisar. Pode me contar, qual é a sua necessidade hoje?"></textarea>
+        <label>Mensagem 2 — Fora do horário comercial</label>
+        <textarea id="m-saudacao2" rows="4" placeholder="Ex: Olá! Obrigada pelo contato! Nosso horário de atendimento humano é de seg a sex das 8h às 18h. Mas pode me contar sua necessidade que já anoto tudo e nossa equipe te retorna assim que possível!"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-zap"/></svg>
+          Respostas Rápidas
+        </div>
+        <label>Quando cliente pergunta o preço</label>
+        <textarea id="m-preco" rows="3" placeholder="Ex: Ótima pergunta! O valor vai depender do seu perfil e necessidade. Me conta um pouco mais sobre o que você procura e eu te passo uma estimativa bem personalizada, tá?"></textarea>
+        <label>Quando cliente pede mais informações</label>
+        <textarea id="m-infos" rows="3" placeholder="Ex: Claro! Com prazer. Vou te passar tudo que precisa saber. Para eu te ajudar melhor: você busca para uso próprio ou investimento?"></textarea>
+        <label>Quando cliente diz 'vou pensar'</label>
+        <textarea id="m-pensar" rows="3" placeholder="Ex: Entendo completamente! Decisão importante merece reflexão. Só te pergunto: tem alguma dúvida que eu possa esclarecer agora que te ajude nessa decisão?"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-brain"/></svg>
+          Quebra de Objeções
+        </div>
+        <label>Objeção: "Está caro"</label>
+        <textarea id="m-caro" rows="3" placeholder="Ex: Entendo sua preocupação com o valor! Posso te mostrar que na verdade o custo x benefício é excelente. Posso te explicar o que está incluído?"></textarea>
+        <label>Objeção: "Não tenho tempo agora"</label>
+        <textarea id="m-tempo" rows="3" placeholder="Ex: Sem problema! Pode me falar qual o melhor horário pra eu te contatar? Leva só 5 minutinhos e já te passo tudo que precisa!"></textarea>
+        <label>Objeção: "Já tenho outro fornecedor"</label>
+        <textarea id="m-concorrente" rows="3" placeholder="Ex: Que ótimo! Isso mostra que você já conhece a importância disso. Posso te mostrar o que nos diferencia?"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-sparkle"/></svg>
+          Follow-up &amp; Reengajamento
+        </div>
+        <label>Follow-up 24h após primeiro contato sem resposta</label>
+        <textarea id="m-follow1" rows="3" placeholder="Ex: Oi! Tudo bem? Passando para saber se conseguiu pensar na nossa conversa de ontem. Ainda consigo te ajudar!"></textarea>
+        <label>Follow-up 3 dias sem resposta</label>
+        <textarea id="m-follow2" rows="3" placeholder="Ex: Olá! Sei que a vida é corrida. Mas não queria que você perdesse [BENEFÍCIO ESPECÍFICO]. Ainda estou aqui quando precisar!"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-check"/></svg>
+          Encerramento e Humanização
+        </div>
+        <label>Encerramento positivo (venda feita / reunião marcada)</label>
+        <textarea id="m-encer-ok" rows="3" placeholder="Ex: Perfeito! Tudo confirmado! Pode contar com a gente. Logo você vai ver que fez a escolha certa! Qualquer dúvida, estou aqui."></textarea>
+        <label>Encerramento neutro (sem decisão)</label>
+        <textarea id="m-encer-neu" rows="3" placeholder="Ex: Sem problema! Estarei aqui quando precisar. Cuide-se!"></textarea>
+        <label>Frase humanizante para usar durante atendimento</label>
+        <textarea id="m-human" rows="3" placeholder="Ex: Que bom que entrou em contato! / Entendo exatamente o que você quer dizer! / Deixa eu te ajudar com isso agora mesmo!"></textarea>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-secondary" onclick="goStep(1)">
+          <svg width="16" height="16"><use href="#ic-arrow-left"/></svg>
+          Anterior
+        </button>
+        <button class="btn btn-primary" onclick="goStep(3)">
+          Próximo: FAQ
+          <svg width="16" height="16"><use href="#ic-arrow-right"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 3: FAQ ── -->
+    <div class="step-section" id="step-3">
+      <div class="section-header">
+        <div class="section-icon-wrap">
+          <svg width="24" height="24" style="color:var(--accent2)"><use href="#ic-question"/></svg>
+        </div>
+        <div>
+          <div class="section-title">Perguntas Frequentes</div>
+          <div class="section-sub">30 perguntas e respostas prontas — todas editáveis para o seu negócio</div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <svg width="16" height="16" style="color:var(--accent2);flex-shrink:0;margin-top:2px"><use href="#ic-info"/></svg>
+        <span>As perguntas abaixo são geradas automaticamente para o nicho selecionado. Clique em qualquer item para expandir e editar a resposta conforme a realidade da sua empresa.</span>
+      </div>
+
+      <div id="faq-container"></div>
+
+      <div class="step-actions">
+        <button class="btn btn-secondary" onclick="goStep(2)">
+          <svg width="16" height="16"><use href="#ic-arrow-left"/></svg>
+          Anterior
+        </button>
+        <button class="btn btn-primary" onclick="goStep(4)">
+          Próximo: Simulações
+          <svg width="16" height="16"><use href="#ic-arrow-right"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 4: SIMULAÇÕES ── -->
+    <div class="step-section" id="step-4">
+      <div class="section-header">
+        <div class="section-icon-wrap">
+          <svg width="24" height="24" style="color:var(--accent2)"><use href="#ic-play"/></svg>
+        </div>
+        <div>
+          <div class="section-title">Simulações Reais</div>
+          <div class="section-sub">Conversas completas simulando clientes reais — incluídas no prompt de treinamento</div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <svg width="16" height="16" style="color:var(--accent2);flex-shrink:0;margin-top:2px"><use href="#ic-info"/></svg>
+        <span>Estas simulações ensinam a IA como responder em cada cenário real: cliente frio, interessado, irritado e na hora do fechamento.</span>
+      </div>
+
+      <div id="sims-container"></div>
+
+      <div class="step-actions">
+        <button class="btn btn-secondary" onclick="goStep(3)">
+          <svg width="16" height="16"><use href="#ic-arrow-left"/></svg>
+          Anterior
+        </button>
+        <button class="btn btn-primary" onclick="goStep(5)">
+          Próximo: Técnicas
+          <svg width="16" height="16"><use href="#ic-arrow-right"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 5: TÉCNICAS ── -->
+    <div class="step-section" id="step-5">
+      <div class="section-header">
+        <div class="section-icon-wrap">
+          <svg width="24" height="24" style="color:var(--accent2)"><use href="#ic-brain"/></svg>
+        </div>
+        <div>
+          <div class="section-title">Técnicas de Vendas e Persuasão</div>
+          <div class="section-sub">Gatilhos mentais e estratégias que a IA deve aplicar nas conversas</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-zap"/></svg>
+          Gatilhos Mentais Principais
+        </div>
+        <div class="chips">
+          <span class="chip chip-purple">Urgência</span>
+          <span class="chip chip-pink">Escassez</span>
+          <span class="chip chip-blue">Autoridade</span>
+          <span class="chip chip-teal">Prova Social</span>
+          <span class="chip chip-purple">Reciprocidade</span>
+          <span class="chip chip-blue">Pertencimento</span>
+          <span class="chip chip-teal">Curiosidade</span>
+          <span class="chip chip-red">Perda</span>
+        </div>
+        <label style="margin-top:22px;">Como a IA deve aplicar urgência</label>
+        <textarea id="t-urgencia" rows="3" placeholder="Ex: 'Temos apenas 2 unidades disponíveis neste valor' · 'Esta promoção encerra sexta-feira' · 'Hoje consigo ainda encaixar uma visita — amanhã a agenda já está cheia'"></textarea>
+        <label>Como usar escassez</label>
+        <textarea id="t-escassez" rows="3" placeholder="Ex: 'Essa condição especial é só para os 5 primeiros que fecharem este mês' · 'Nossos horários desta semana estão quase lotados'"></textarea>
+        <label>Como demonstrar autoridade</label>
+        <textarea id="t-autoridade" rows="3" placeholder="Ex: Mencionar anos de mercado, número de clientes, prêmios, certificações, especializações da equipe, depoimentos de clientes conhecidos..."></textarea>
+        <label>Como usar prova social</label>
+        <textarea id="t-prova" rows="3" placeholder="Ex: 'Já atendemos mais de 500 clientes na sua região' · 'Ontem mesmo fechamos um cliente com perfil parecido com o seu' · 'Temos 4.9 estrelas no Google'"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-rocket"/></svg>
+          Técnicas de Condução ao Fechamento
+        </div>
+        <label>Perguntas de comprometimento que a IA deve usar</label>
+        <textarea id="t-comprometimento" rows="5" placeholder="Ex:&#10;'Se eu conseguir exatamente isso que você pediu, podemos avançar?'&#10;'O que falta para você tomar a decisão hoje?'&#10;'Qual seria o melhor dia para você assinar / começar?'&#10;'Se o valor caber no seu orçamento, você fecha?'"></textarea>
+        <label>Técnica de ancoragem de preço</label>
+        <textarea id="t-ancora" rows="3" placeholder="Ex: Sempre apresentar o plano mais caro primeiro para que o intermediário pareça mais acessível. Mostrar o custo total vs. custo por dia ou mês."></textarea>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-secondary" onclick="goStep(4)">
+          <svg width="16" height="16"><use href="#ic-arrow-left"/></svg>
+          Anterior
+        </button>
+        <button class="btn btn-primary" onclick="goStep(6)">
+          Próximo: Proibições
+          <svg width="16" height="16"><use href="#ic-arrow-right"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 6: PROIBIÇÕES ── -->
+    <div class="step-section" id="step-6">
+      <div class="section-header">
+        <div class="section-icon-wrap">
+          <svg width="24" height="24" style="color:var(--accent2)"><use href="#ic-ban"/></svg>
+        </div>
+        <div>
+          <div class="section-title">Proibições e Boas Práticas</div>
+          <div class="section-sub">O que a IA nunca deve fazer e como soar genuinamente humana</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:#f87171"><use href="#ic-ban"/></svg>
+          O que a IA NUNCA deve fazer
+          <span class="card-tag">Crítico</span>
+        </div>
+        <div class="warn-box">
+          <svg width="16" height="16" style="color:#f87171;flex-shrink:0;margin-top:2px"><use href="#ic-alert"/></svg>
+          <span>Estas regras são absolutas e devem ser tratadas como invioláveis no treinamento da IA. Qualquer violação compromete a credibilidade da marca.</span>
+        </div>
+        <label>Proibições absolutas (uma por linha)</label>
+        <textarea id="p-proib" rows="10" placeholder="- Nunca revelar que é uma IA antes do cliente perguntar diretamente&#10;- Nunca falar mal de concorrentes&#10;- Nunca prometer prazos que não pode cumprir&#10;- Nunca inventar informações que não tem certeza&#10;- Nunca dar desconto sem autorização&#10;- Nunca responder sobre assuntos políticos ou religiosos&#10;- Nunca usar linguagem agressiva mesmo se o cliente usar&#10;- Nunca enviar preços sem antes entender a necessidade do cliente&#10;- Nunca demorar mais de 2 minutos para responder&#10;- Nunca encerrar atendimento sem oferecer próximo passo&#10;- Nunca iniciar frase com 'Como IA...' ou 'Sou um robô...'"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" style="color:var(--accent)"><use href="#ic-sparkle"/></svg>
+          Como Evitar Parecer Robótica
+        </div>
+        <div class="chips" style="margin-bottom:20px;">
+          <span class="chip chip-teal">Use contrações</span>
+          <span class="chip chip-purple">Varie respostas</span>
+          <span class="chip chip-blue">Frases curtas</span>
+          <span class="chip chip-pink">Mostre empatia</span>
+          <span class="chip chip-teal">Use o nome</span>
+          <span class="chip chip-purple">Faça perguntas</span>
+        </div>
+        <label>Palavras e frases proibidas (que soam robóticas)</label>
+        <textarea id="p-robotico" rows="4" placeholder="- 'Claro! Com prazer!' (toda hora soa automático)&#10;- 'Entendido. Processando sua solicitação.'&#10;- 'Prezado Cliente,'&#10;- 'Atenciosamente, IA de Atendimento'&#10;- Qualquer frase extremamente formal e fria"></textarea>
+        <label>Palavras e expressões recomendadas (soam humanas)</label>
+        <textarea id="p-humano" rows="4" placeholder="- 'Boa pergunta!'&#10;- 'Entendo exatamente o que você quer dizer'&#10;- 'Deixa eu ver isso aqui pra você'&#10;- 'Posso te ajudar com isso agora mesmo!'&#10;- Usar o primeiro nome do cliente quando souber"></textarea>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-secondary" onclick="goStep(5)">
+          <svg width="16" height="16"><use href="#ic-arrow-left"/></svg>
+          Anterior
+        </button>
+        <button class="btn btn-primary" onclick="goStep(7)">
+          Próximo: Gerar Prompt
+          <svg width="16" height="16"><use href="#ic-arrow-right"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 7: GERAR ── -->
+    <div class="step-section" id="step-7">
+      <div class="section-header">
+        <div class="section-icon-wrap">
+          <svg width="24" height="24" style="color:var(--accent2)"><use href="#ic-rocket"/></svg>
+        </div>
+        <div>
+          <div class="section-title">Gerar Prompt de Treinamento</div>
+          <div class="section-sub">Seu prompt completo e profissional, pronto para qualquer plataforma de IA</div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <svg width="16" height="16" style="color:var(--accent2);flex-shrink:0;margin-top:2px"><use href="#ic-info"/></svg>
+        <span>Ao clicar em <strong style="color:var(--accent2)">Gerar Prompt</strong>, o sistema compila todos os dados preenchidos em um prompt estruturado, pronto para ser colado em qualquer plataforma de IA — ChatGPT, Claude, Gemini, ManyChat, Typebot, Z-API e outras.</span>
+      </div>
+
+      <div style="margin: 28px 0;">
+        <button class="btn-generate" onclick="gerarPrompt()">
+          <svg width="20" height="20" style="color:white;display:inline-block;vertical-align:middle;margin-right:10px"><use href="#ic-zap"/></svg>
+          Gerar Prompt de Treinamento Completo
+        </button>
+      </div>
+
+      <div class="prompt-output-wrap" id="prompt-output-wrap">
+        <div class="prompt-output-header">
+          <div class="prompt-output-dots">
+            <div class="prompt-dot"></div>
+            <div class="prompt-dot"></div>
+            <div class="prompt-dot"></div>
+          </div>
+          <span class="prompt-output-label">prompt-ia-whatsapp.txt</span>
+          <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;" id="prompt-char-count"></span>
+        </div>
+        <pre id="prompt-output"></pre>
+      </div>
+
+      <div class="copy-bar" id="copy-bar" style="display:none;">
+        <button class="btn btn-secondary" onclick="copiarPrompt()">
+          <svg width="15" height="15"><use href="#ic-copy"/></svg>
+          Copiar Prompt
+        </button>
+        <button class="btn btn-primary" onclick="downloadPrompt()">
+          <svg width="15" height="15"><use href="#ic-download"/></svg>
+          Baixar .txt
+        </button>
+      </div>
+
+      <div class="step-actions end" style="margin-top:24px;">
+        <button class="btn btn-secondary" onclick="goStep(6)">
+          <svg width="16" height="16"><use href="#ic-arrow-left"/></svg>
+          Anterior
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /app-container -->
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon-wrap">
+    <svg width="14" height="14" style="color:var(--accent2)" id="toast-icon-svg"><use href="#ic-check"/></svg>
+  </div>
+  <span id="toast-msg">Concluído!</span>
+</div>
+
+<script>
+
+// ══════════════════════════════════════════════
+// DATA: Nichos
+// ══════════════════════════════════════════════
+const NICHOS = {
+  imoveis: {
+    label: 'Imobiliária',
+    faq: [
+      [`Vocês trabalham com compra, venda ou aluguel?`, `Trabalhamos com tudo! Compra, venda, locação e administração de imóveis. Pode me contar o que você precisa que eu te direciono para o especialista certo.`],
+      [`Qual o valor mínimo dos imóveis que vocês trabalham?`, `Trabalhamos com imóveis a partir de R$ [VALOR]. Mas me conta o seu perfil e orçamento que eu te mostro as melhores opções disponíveis!`],
+      [`Preciso de entrada para comprar um imóvel?`, `Depende da modalidade de compra! Pelo financiamento bancário normalmente pede-se entre 20% e 30% de entrada. Mas temos opções facilitadas — quer que eu detalhe as alternativas?`],
+      [`Vocês têm imóveis na planta?`, `Sim! Temos excelentes opções na planta com condições especiais de pagamento durante a obra. Quer receber uma seleção das melhores oportunidades?`],
+      [`Como funciona a avaliação de imóvel para venda?`, `Nossa equipe faz a avaliação de forma gratuita e sem compromisso. Um corretor especialista visita o imóvel e apresenta um laudo completo de mercado. Posso agendar para você?`],
+      [`Quanto custa a corretagem?`, `A corretagem segue a tabela CRECI, que varia entre 6% e 8% para imóveis residenciais. Para quem vende, é incluso no processo. Quer saber mais?`],
+      [`Vocês auxiliam com o financiamento bancário?`, `Sim! Temos um time especializado em crédito imobiliário que cuida de todo o processo com os principais bancos. Facilitamos muito para você!`],
+      [`O imóvel pode estar com alguma pendência?`, `Fazemos toda a due diligence jurídica antes da negociação. Você compra seguro, sem surpresas desagradáveis.`],
+      [`Quanto tempo leva para fechar uma compra?`, `Depende da modalidade. À vista: 30 a 60 dias. Financiado: 60 a 90 dias. Com nosso suporte, o processo é muito mais ágil!`],
+      [`Vocês têm imóveis com documentação ok?`, `Sim! Todos os imóveis do nosso portfólio passam por análise documental antes de entrar em anúncio. Transparência total para você!`],
+      [`Como posso ver os imóveis disponíveis?`, `Posso te enviar uma seleção personalizada agora mesmo! Me conta: qual bairro, quantos quartos e qual orçamento? Assim filtro o que é ideal pra você.`],
+      [`Vocês fazem visita presencial?`, `Com certeza! Agendamos visitas presenciais ou virtuais. Me passa sua disponibilidade de horário que eu já verifico a agenda do corretor.`],
+      [`Posso usar meu FGTS para comprar?`, `Sim! É possível usar o FGTS como parte da entrada ou para amortizar o saldo devedor. Nossa equipe te orienta sobre as regras e condições.`],
+      [`Qual o melhor bairro para investir?`, `Ótima pergunta! Depende do seu objetivo — valorização, renda de aluguel ou moradia. Me conta mais e eu indico os bairros com melhor performance no momento.`],
+      [`Vocês administram o aluguel do meu imóvel?`, `Sim! Cuidamos de tudo: divulgação, seleção de inquilino, contrato, repasse mensal e manutenção. Você não precisa se preocupar com nada.`],
+      [`Qual a taxa de administração de aluguel?`, `Nossa taxa é de [X]% sobre o valor do aluguel. É tudo incluso no serviço. Muito mais tranquilo do que administrar você mesmo!`],
+      [`Vocês têm opções de imóveis comerciais?`, `Sim! Temos salas, galpões, lajes corporativas e lojas. Qual é o seu ramo de negócio? Assim já filtro o que melhor se encaixa.`],
+      [`O financiamento cabe no meu salário?`, `Vamos calcular juntos! Os bancos normalmente aceitam até 30% da renda para prestação. Me passa sua renda aproximada e eu já simulo para você.`],
+      [`Precisa de avalista para alugar?`, `Trabalhamos com fiador, seguro fiança ou título de capitalização. Cada opção tem vantagens — me conta sua situação que eu te oriento!`],
+      [`Vocês têm apartamento mobiliado?`, `Sim! Temos opções mobiliadas e semimobiliadas. São ótimas para quem quer praticidade e redução de custos iniciais.`],
+      [`Quais documentos preciso para comprar?`, `Basicamente: RG, CPF, comprovante de renda e residência. Se for casado, documentos do cônjuge também. Monto uma lista completa para você!`],
+      [`Posso parcelar a entrada?`, `Em alguns casos sim, principalmente em lançamentos e imóveis na planta. Me conta qual imóvel te interessa que verifico essa possibilidade.`],
+      [`Têm imóveis de leilão?`, `Trabalhamos com imóveis de carteira, mas também orientamos sobre oportunidades de leilão para quem quer investir. Quer saber mais?`],
+      [`Qual a diferença entre corretor e imobiliária?`, `O corretor atua como pessoa física. A imobiliária oferece estrutura completa: equipe, marketing, jurídico e suporte pós-venda. Com a gente você tem tudo isso!`],
+      [`Vocês cobram para anunciar meu imóvel?`, `Não! A anúncio é gratuito. Só cobramos a corretagem no momento do fechamento da venda. Sem risco para você!`],
+      [`Vocês têm imóveis na minha cidade?`, `Atuamos em [REGIÃO]. Me passa o bairro que você procura e verifico o que temos disponível agora!`],
+      [`Como funciona a proposta de compra?`, `Você faz uma proposta formal pelo nosso sistema, negociamos com o vendedor e, em aprovada, partimos para o contrato. Simples e seguro!`],
+      [`O imóvel tem garantia?`, `Os imóveis novos têm garantia da construtora. Os usados passam por vistoria. Qualquer problema encontrado antes do fechamento é tratado antes da venda.`],
+      [`Posso fazer permuta de imóvel?`, `Sim! Trabalhamos com permuta total ou parcial. É uma ótima estratégia em muitos casos. Me conta o que você tem e o que busca!`],
+      [`Quais são os próximos passos para começar?`, `Simples! Me passa seu telefone e nome completo que eu te coloco em contato direto com um de nossos consultores agora mesmo. Qual o melhor horário pra você?`],
+    ],
+    sims: [
+      {
+        title: 'Sim. 1: Cliente buscando primeiro imóvel',
+        msgs: [
+          {role:'user', text:`Boa tarde, quero comprar meu primeiro apartamento mas não sei por onde começar`},
+          {role:'ai', text:`Boa tarde!  Que momento incrível, parabéns pela decisão! Aqui é a [IA], consultora da [EMPRESA]. Fico feliz em te ajudar nessa jornada! Para eu te indicar as melhores opções: qual bairro ou região você prefere? E tem uma ideia de valor de entrada ou prestação mensal?`},
+          {role:'user', text:`Moro em SP, zona sul. Tenho uns 50 mil de entrada`},
+          {role:'ai', text:`Perfeito! Com 50k de entrada você já tem acesso a excelentes opções na Zona Sul.  Dependendo do banco, conseguimos financiar imóveis entre 200k e 250k. Você prefere apartamento pronto para morar ou na planta? Os na planta têm condições de pagamento mais facilitadas durante a obra!`},
+          {role:'user', text:`Prefiro pronto pra morar. Tem opções com 2 quartos?`},
+          {role:'ai', text:`Temos sim! Tenho algumas opções de 2 quartos prontas para morar na Zona Sul dentro desse perfil. Posso te enviar agora uma seleção com fotos e valores? Também consigo te agendar uma visita ainda essa semana! `},
+        ]
+      },
+      {
+        title: 'Sim. 2: Cliente irritado com demora de atendimento',
+        msgs: [
+          {role:'user', text:`Que absurdo, já mandei mensagem ontem e ninguém respondeu até agora!`},
+          {role:'ai', text:`Oi!  Tem toda razão em estar chateado e me desculpe muito pelo delay. Isso não é o padrão de atendimento que praticamos. Me conta o que você precisa que resolvo agora mesmo, com prioridade total pra você!`},
+          {role:'user', text:`Quero informações sobre um apartamento na Vila Andrade`},
+          {role:'ai', text:`Com certeza! Já estou verificando os apartamentos disponíveis na Vila Andrade agora.  Me passa qual tamanho e faixa de valor você busca e te envio as informações em instantes!`},
+        ]
+      },
+      {
+        title: 'Sim. 3: Cliente frio que "só está olhando"',
+        msgs: [
+          {role:'user', text:`oi, vi vocês no instagram, só tô olhando mesmo`},
+          {role:'ai', text:`Oi!  Olhar faz parte, fica à vontade! Aproveita e me conta: você pensa mais em comprar ou alugar? Assim, se surgir algo que faça sentido pro seu perfil, te aviso em primeira mão!`},
+          {role:'user', text:`Penso em comprar, mas daqui uns 6 meses talvez`},
+          {role:'ai', text:`Que ótimo! Planejar com antecedência é exatamente o que os melhores compradores fazem.  Posso te enviar um guia gratuito com o passo a passo para quem vai comprar o primeiro imóvel? Vai te ajudar muito a chegar preparado nesse momento!`},
+        ]
+      }
+    ]
+  },
+
+  estetica: {
+    label: 'Clínica Estética',
+    faq: [
+      [`Quais tratamentos vocês oferecem?`, `Oferecemos uma linha completa: limpeza de pele, botox, preenchimento, laser, radiofrequência, drenagem linfática, harmonização facial e muito mais! Qual área você quer tratar?`],
+      [`Os procedimentos doem?`, `A maioria dos procedimentos é muito confortável! Aplicamos anestesia tópica quando necessário. Nossos clientes costumam se surpreender com o conforto.`],
+      [`Quanto tempo dura o botox?`, `O botox tem duração média de 4 a 6 meses, variando de acordo com o metabolismo de cada pessoa. Após esse período fazemos a manutenção.`],
+      [`Preciso de avaliação antes de começar?`, `Sim! Toda jornada começa com uma avaliação gratuita com nossa equipe especializada. Assim traçamos o protocolo ideal para você.`],
+      [`Os produtos utilizados são seguros?`, `Trabalhamos exclusivamente com produtos aprovados pela ANVISA, de marcas líderes de mercado. Segurança é nossa prioridade!`],
+      [`Quanto custa uma sessão de laser?`, `Depende da área a ser tratada e do tipo de laser. Na avaliação gratuita te passamos o orçamento personalizado. O que você quer tratar?`],
+      [`Quantas sessões vou precisar?`, `Varia com o tipo de tratamento e o seu caso específico. Normalmente protocolos têm entre 4 e 10 sessões. Nossa especialista te dirá exatamente na avaliação.`],
+      [`Preciso de atestado médico?`, `Para procedimentos mais avançados, sim. Para tratamentos estéticos gerais não. Pode nos contar qual tratamento te interessa?`],
+      [`Vocês atendem homens também?`, `Claro! Cerca de 40% dos nossos clientes são homens. Botox, limpeza de pele, bioestimuladores e laser são muito procurados por eles.`],
+      [`Qual a diferença entre preenchimento e botox?`, `O botox relaxa músculos, reduzindo marcas de expressão. O preenchimento adiciona volume, como nos lábios e maçãs do rosto. São complementares!`],
+      [`Posso fazer vários tratamentos no mesmo dia?`, `Depende da combinação. Nossa profissional avalia e indica o protocolo mais seguro e eficaz para você.`],
+      [`Tem alguma contraindicação?`, `Sim, algumas. Gravidez, amamentação e algumas condições de saúde. Tudo é avaliado na consulta inicial para garantir sua segurança.`],
+      [`Os resultados são permanentes?`, `Depende do tratamento! Alguns são duradouros, outros precisam de manutenção. Na avaliação explicamos tudo de forma clara.`],
+      [`Vocês têm pacotes?`, `Sim! Temos pacotes especiais com desconto significativo em relação às sessões individuais. Posso te enviar nosso menu de pacotes?`],
+      [`Como funciona o pagamento?`, `Aceitamos PIX, cartão de crédito (parcelamento em até [X]x) e cartão de débito. Pacotes têm condições especiais!`],
+      [`Preciso de indicação médica?`, `Para procedimentos médicos como botox e preenchimento, são realizados por profissionais habilitados. Para tratamentos estéticos gerais, não precisa.`],
+      [`Quanto tempo leva cada sessão?`, `Varia por tratamento. Uma sessão de botox leva cerca de 30 min. Limpeza de pele umas 2 horas. Te informamos exatamente ao agendar.`],
+      [`Posso maquiar depois do procedimento?`, `Em muitos casos sim, mas alguns procedimentos pedem intervalo. Nossa equipe passa todas as orientações de pós-cuidado.`],
+      [`Vocês têm lista de espera?`, `Nossa agenda é bastante concorrida! Por isso recomendo agendarmos o quanto antes. Posso verificar os próximos horários disponíveis para você?`],
+      [`Qual o procedimento mais indicado para manchas?`, `Temos excelentes protocolos para manchas: laser, peelings e despigmentantes. A indicação certa depende do tipo de mancha. Vamos marcar uma avaliação?`],
+      [`Funciona para todos os tipos de pele?`, `Temos protocolos adaptados para todos os fototipos de pele. Atendemos com excelência peles claras, morenas e negras.`],
+      [`Vocês fazem sobrancelha?`, `Sim! Trabalhamos com design de sobrancelha, micropigmentação e brow lamination. Quer agendar?`],
+      [`Tem estacionamento?`, `Sim! Temos estacionamento [gratuito/parceiro] disponível para clientes. Nossa clínica é muito acessível.`],
+      [`Posso trazer minha mãe junto?`, `Com prazer! Pode vir com quem quiser. Temos espaço confortável de espera e também podemos avaliar ela enquanto você faz seu procedimento `],
+      [`Quem são as profissionais?`, `Nossa equipe é formada por [ESPECIALISTAS COM FORMAÇÃO]. Todos com anos de experiência e atualizações constantes.`],
+      [`Vocês fazem harmonização facial completa?`, `Sim! Harmonização completa inclui uma avaliação global do rosto e um plano de tratamento personalizado. É uma das nossas especialidades!`],
+      [`Quanto tempo de recuperação?`, `A maioria dos tratamentos tem recuperação zero ou mínima. Alguns procedimentos mais avançados exigem 2 a 7 dias. Te orientamos sobre cada um.`],
+      [`Vocês têm programa de fidelidade?`, `Sim! A cada [X] sessões você ganha benefícios exclusivos. Pergunta sobre o programa no seu próximo agendamento!`],
+      [`Como cancelo ou remarco uma consulta?`, `Super simples! Me avisa por aqui mesmo com pelo menos 24h de antecedência e eu remarcamos sem custo.`],
+      [`Quais são os próximos passos para começar?`, `Vamos agendar sua avaliação gratuita! É sem compromisso e você sai com um plano completo. Qual dia da semana funciona melhor pra você? `],
+    ],
+    sims: [
+      {
+        title: 'Sim. 1: Cliente querendo eliminar rugas',
+        msgs: [
+          {role:'user', text:`Oi, tô com umas rugas no testa que me incomodam muito, o que vocês fazem pra isso?`},
+          {role:'ai', text:`Oi!  Entendo muito bem! Rugas na testa têm solução super eficaz. O botox é o procedimento mais indicado — resultado rápido, natural e dura até 6 meses. Mas posso te recomendar melhor após uma avaliação! Quer agendar uma avaliação gratuita esta semana?`},
+          {role:'user', text:`Quanto custa mais ou menos?`},
+          {role:'ai', text:`Para a região da testa, o botox fica em torno de R$ [VALOR]. Mas tudo depende do número de unidades que você precisará — isso definimos na avaliação. Ah, e temos condições de parcelamento! Qual dia você tem disponível?`},
+        ]
+      },
+      {
+        title: 'Sim. 2: Objeção de preço',
+        msgs: [
+          {role:'user', text:`Achei meio caro a sessão de laser que me passaram`},
+          {role:'ai', text:`Entendo!  O investimento faz sentido quando vemos o resultado. Mas quero te mostrar uma coisa: no pacote completo de sessões o valor por sessão cai bastante. Além disso, temos parcelamento. Posso te enviar as opções de pacote para comparar?`},
+          {role:'user', text:`Manda sim`},
+          {role:'ai', text:`Ótimo! Segue as opções de pacote: [LISTA DE PACOTES]. No plano mais completo o custo por sessão é X% menor. Muito mais vantajoso! Quer que eu reserve uma das vagas com condição especial para você essa semana?`},
+        ]
+      }
+    ]
+  },
+
+  solar: {
+    label: 'Energia Solar',
+    faq: [
+      [`Como funciona a energia solar?`, `Os painéis captam a luz solar e convertem em energia elétrica que abastece sua casa ou empresa. O excedente é enviado à rede e vira crédito na sua conta!`],
+      [`Quanto vou economizar na conta de luz?`, `A média é de 80% a 95% de economia! Em muitos casos a conta cai para o mínimo da distribuidora. Quanto você paga hoje de luz?`],
+      [`Quanto tempo demora a instalação?`, `Após aprovação da distribuidora (30 a 60 dias em média), a instalação em si leva 1 a 3 dias dependendo do porte do sistema.`],
+      [`E quando chove ou está nublado?`, `Os painéis continuam gerando energia mesmo em dias nublados, com eficiência reduzida. E à noite você usa os créditos acumulados na rede.`],
+      [`Qual o tempo de retorno do investimento?`, `Entre 3 e 5 anos em média. Depois disso, é economia pura por mais 20 a 25 anos!`],
+      [`Quanto custa um sistema solar?`, `Depende do consumo da sua residência ou empresa. Para uma casa com conta de R$ 300, um sistema fica em torno de R$ [VALOR]. Posso calcular exatamente para você!`],
+      [`Posso financiar a instalação?`, `Sim! Temos financiamento com as melhores condições do mercado. Em muitos casos, a parcela é menor do que o valor que você economiza na conta de luz!`],
+      [`Os painéis precisam de manutenção?`, `Manutenção mínima! Uma limpeza semestral e revisão anual são suficientes. Temos planos de manutenção preventiva.`],
+      [`Qual a durabilidade dos painéis?`, `Os painéis têm garantia de 25 anos de geração e vida útil de 30 a 40 anos. Um investimento extremamente seguro!`],
+      [`Posso instalar em apartamento?`, `Sim! Em condomínios é possível instalar painéis compartilhados com rateio da economia. Cada caso tem uma solução!`],
+      [`A distribuidora aceita a energia que eu gero?`, `Sim, é regulamentado pela ANEEL. Você tem direito de injetar na rede e usar os créditos quando precisar.`],
+      [`Minha casa precisa de obra?`, `Não! A instalação é limpa, sem obra civil. Instalamos na cobertura ou telhado sem danos à estrutura.`],
+      [`Os painéis resistem a granizo e vento?`, `Sim! São fabricados para suportar condições climáticas severas, com certificações internacionais de resistência.`],
+      [`Que marcas de painéis vocês trabalham?`, `Trabalhamos com as melhores marcas do mercado mundial: [MARCAS]. Todas com certificação INMETRO.`],
+      [`Preciso de aprovação da prefeitura?`, `Cuidamos de toda a parte burocrática: projeto, aprovação junto à distribuidora e ANEEL. Você não precisa se preocupar com nada!`],
+      [`Como sei quantos painéis eu preciso?`, `Calculamos com base na sua conta de luz. Me passa sua conta média mensal e faço a simulação agora!`],
+      [`O sistema funciona em caso de queda de energia?`, `O sistema padrão (conectado à rede) desliga por segurança. Com baterias, você mantém energia mesmo em blackout!`],
+      [`Vocês têm sistema com bateria?`, `Sim! Os sistemas com bateria (off-grid ou híbridos) garantem autonomia total. Posso te apresentar as opções.`],
+      [`Qual o tamanho dos painéis?`, `Os painéis residenciais medem cerca de 1,7m x 1m. Calculamos a quantidade necessária de acordo com sua área disponível e consumo.`],
+      [`Vocês atendem empresas?`, `Com certeza! Empresas são nossos maiores clientes. A economia é ainda mais expressiva e o retorno mais rápido!`],
+      [`Tenho imóvel rural, posso instalar?`, `Perfeito! Para propriedades rurais é ainda mais vantajoso, especialmente se o fornecimento de energia é instável ou caro.`],
+      [`Quais são os incentivos fiscais?`, `Energia solar tem isenção de ICMS em muitos estados e redução de impostos federais para sistemas residenciais. Orientamos sobre os benefícios na sua região.`],
+      [`Como funciona o crédito na conta de luz?`, `A energia que você gera e não usa vai para a rede. A distribuidora registra isso como créditos que você usa nos meses de menor geração (período de chuvas).`],
+      [`Qual o meu consumo ideal para instalar?`, `A partir de R$ 150/mês na conta de luz já é viável. Quanto maior o consumo, maior a economia e mais rápido o retorno!`],
+      [`A instalação é garantida?`, `Oferecemos garantia de [X] anos na instalação e equipamentos. Temos assistência técnica própria em toda a região.`],
+      [`Consigo vender energia para a distribuidora?`, `No Brasil hoje o modelo é de compensação (créditos), não de venda direta. Mas a compensação é excelente e garante ótima economia.`],
+      [`Quanto tempo leva a proposta?`, `Rapidíssimo! Me passa sua conta de luz e em poucas horas eu já te envio a simulação completa com retorno de investimento.`],
+      [`Vocês fazem o projeto completo?`, `Sim! Cuidamos de tudo: projeto, homologação, instalação, conexão e treinamento de uso. Chave na mão!`],
+      [`Posso instalar em telhado colonial ou metálico?`, `Instalamos em todos os tipos de telhado: cerâmica, fibrocimento, metálico, laje. Cada um tem fixação específica que não compromete a estrutura.`],
+      [`Quais são os próximos passos?`, `Simples! Me passa sua conta de luz (ou valor médio mensal) e eu faço uma simulação gratuita. Você vê exatamente quanto vai economizar e em quanto tempo tem retorno!`],
+    ],
+    sims: [
+      {
+        title: 'Sim. 1: Cliente com conta alta de luz',
+        msgs: [
+          {role:'user', text:`Boa tarde, minha conta de luz tá em 800 reais por mês, vi que energia solar pode ajudar`},
+          {role:'ai', text:`Boa tarde!  Com R$800/mês você é um candidato PERFEITO para energia solar! Com um sistema ideal para seu consumo, você pagaria no máximo R$ 50 a 80 de mínimo da distribuidora. Isso é mais de R$ 700/mês de economia!  Posso fazer uma simulação completa para você agora — qual é o seu endereço e você tem o pdf da conta de luz?`},
+          {role:'user', text:`Tenho sim, como mando?`},
+          {role:'ai', text:`Pode mandar a foto aqui mesmo no WhatsApp! Vou analisar e em seguida te envio a simulação com: quantidade de painéis, valor do investimento, economia mensal e tempo de retorno. Aguardo sua conta! `},
+        ]
+      },
+      {
+        title: 'Sim. 2: Cliente com dúvida sobre retorno',
+        msgs: [
+          {role:'user', text:`mas 5 anos pra ter retorno parece muito tempo...`},
+          {role:'ai', text:`Entendo a sensação! Mas olha de outro ângulo: imagine ter um investimento que rende 20% ao ano, livre de risco, durante 25 anos. Isso é exatamente o que a energia solar representa! Após o retorno, você tem 20+ anos de energia praticamente gratuita. É como comprar a sua energia com desconto permanente! Quer ver a simulação exata para o seu caso?`},
+        ]
+      }
+    ]
+  },
+
+  seguros: {
+    label: 'Seguros & Consórcio',
+    faq: [
+      [`Qual a diferença entre seguro e consórcio?`, `Seguro protege contra imprevistos pagando mensalmente. Consórcio é uma forma de compra planejada em grupo, sem juros, onde você é contemplado por sorteio ou lance!`],
+      [`Como funciona o consórcio?`, `Um grupo de pessoas contribui mensalmente. Todo mês alguém é contemplado com a carta de crédito para comprar o bem desejado (imóvel, carro, moto etc).`],
+      [`Tenho garantia de ser contemplado?`, `Sim! Todos são contemplados dentro do prazo do grupo. Você pode ser no primeiro mês por sorteio, ou antecipar com um lance!`],
+      [`Consórcio tem juros?`, `Não há juros! Há apenas a taxa de administração, que é muito menor que os juros de um financiamento tradicional. Grande diferença!`],
+      [`Posso usar o consórcio para imóvel?`, `Sim! Temos grupos de consórcio imobiliário com cartas de crédito de R$[X] a R$[X]. É a forma mais inteligente de comprar seu imóvel!`],
+      [`O que é carta de crédito?`, `É o valor que você recebe quando é contemplado, para usar na compra do bem. Funciona como dinheiro na mão na hora da negociação!`],
+      [`Posso dar lance?`, `Sim! O lance adianta sua contemplação. Você oferta um percentual do crédito e se for o maior lance do mês, é contemplado!`],
+      [`Como funciona o seguro de vida?`, `O seguro de vida garante um capital para sua família em caso de falecimento ou invalidez. Os planos variam em cobertura e mensalidade.`],
+      [`Preciso de seguro de carro?`, `O seguro automotivo é fundamental! Protege contra roubo, colisão, danos a terceiros e muito mais. Sem ele, um acidente pode ser catastrófico financeiramente.`],
+      [`Qual o seguro mais indicado para minha empresa?`, `Empresas têm necessidades específicas: seguro patrimonial, responsabilidade civil, seguro de equipamentos, etc. Me conta mais sobre sua empresa que te oriento!`],
+      [`Posso cancelar o consórcio?`, `Sim, mas há regras. O valor pago é devolvido ao final do grupo ou por sorteio especial. Recomendo avaliar bem antes — temos alternativas!`],
+      [`O que cobre o seguro residencial?`, `Cobre incêndio, roubo, danos elétricos, vendaval e responsabilidade civil entre outros. Cada plano tem suas coberturas — vou te explicar as opções!`],
+      [`Seguro é despesa ou investimento?`, `É um investimento em proteção! Um único sinistro sem seguro pode destruir patrimônio de anos. O seguro é a proteção desse patrimônio.`],
+      [`Como é calculado o valor do seguro de carro?`, `Leva em conta: modelo, ano, perfil do condutor, CEP de pernoite e histórico. Cada perfil tem um valor específico. Posso fazer uma cotação agora!`],
+      [`Minha empresa precisa de seguro de responsabilidade civil?`, `Se você presta serviços ou tem clientes que visitam sua empresa, sim! Protege contra danos que você possa causar involuntariamente a terceiros.`],
+      [`Consórcio é bom para quem não tem pressa?`, `Perfeito para quem planeja! Mas mesmo com pressa, o lance pode contemplar no início do grupo. Depende da estratégia!`],
+      [`Quantas parcelas tem um consórcio?`, `Os grupos têm entre 60 e 240 meses, dependendo do tipo e valor. Me passa o que você quer comprar que indico o melhor grupo!`],
+      [`Posso usar o consórcio para reforma?`, `Sim! Com consórcio imobiliário você pode usar a carta de crédito para reforma ou construção, não só compra!`],
+      [`O que acontece se eu atrasar uma parcela?`, `Há multa e você fica suspenso de sorteios. Por isso recomendamos os grupos que se encaixam no orçamento. Planejar bem é tudo!`],
+      [`Tenho CNPJ, posso fazer consórcio?`, `Pessoa jurídica também pode! E pode ser muito vantajoso para renovar frota, equipamentos ou imóveis comerciais.`],
+      [`O seguro de vida tem carência?`, `Depende da cobertura. Morte acidental geralmente não tem. Doenças podem ter de 90 a 180 dias. Explicamos tudo na proposta.`],
+      [`Quais seguradoras vocês trabalham?`, `Somos parceiros das principais seguradoras do país: [SEGURADORAS]. Isso garante que você sempre terá a melhor condição!`],
+      [`Posso acumular coberturas no seguro?`, `Sim! É possível personalizar o seguro adicionando coberturas de acordo com sua necessidade. Flexibilidade total!`],
+      [`Consórcio é regulamentado?`, `Sim! O Banco Central fiscaliza todas as administradoras. É um produto seguro e regulamentado por lei.`],
+      [`Qual o prazo para receber após sinistro?`, `Depende do tipo e da vistoria. Em média, de 15 a 30 dias após documentação completa. Em sinistros simples, pode ser mais rápido.`],
+      [`Posso fazer seguro para um carro usado?`, `Claro! Seguros para veículos usados são muito comuns e acessíveis. Me passa o modelo, ano e CEP que faço uma cotação!`],
+      [`Tem seguro para equipamentos eletrônicos?`, `Sim! Protegemos notebooks, celulares, TVs e outros equipamentos contra danos acidentais, roubo e defeitos. Quer saber mais?`],
+      [`O que é sinistro?`, `Sinistro é a ocorrência do evento coberto pelo seguro (roubo, acidente, incêndio etc). É quando o seguro é acionado para te amparar.`],
+      [`Como faço para acionar o seguro?`, `Pelo nosso suporte [NÚMERO] ou diretamente com a seguradora. Orientamos você em todo o processo!`],
+      [`Quais são os próximos passos?`, `Me passa seu nome, o produto de interesse e seu melhor horário. Em seguida um especialista te apresenta as opções ideais para o seu perfil!`],
+    ],
+    sims: [
+      {
+        title: 'Sim. 1: Cliente querendo proteger o carro',
+        msgs: [
+          {role:'user', text:`Oi preciso de seguro pro meu carro, é um Corolla 2021`},
+          {role:'ai', text:`Oi!  Ótima escolha proteger o Corolla! É um carro com bom perfil de seguro. Para te passar uma cotação precisa, me informa: seu CEP de pernoite (onde o carro dorme), sua idade e se você é o principal condutor?`},
+          {role:'user', text:`CEP 04001, 35 anos, sou eu mesmo quem dirige`},
+          {role:'ai', text:`Perfeito! Com esse perfil consigo excelentes condições. Vou preparar uma cotação com coberturas completa e econômica para te apresentar. Você prefere uma cobertura abrangente (colisão + roubo + terceiros) ou quer ver as opções primeiro?`},
+        ]
+      },
+      {
+        title: 'Sim. 2: Cliente interessado em consórcio de imóvel',
+        msgs: [
+          {role:'user', text:`quero comprar um apartamento mas financiamento tá muito caro com esses juros altos`},
+          {role:'ai', text:`Você tocou num ponto muito importante!  Os juros do financiamento estão pesados mesmo. É exatamente por isso que o consórcio imobiliário virou a opção mais inteligente. Sem juros, você paga só a taxa de administração — muito menor. Me conta: qual o valor aproximado do imóvel que você busca?`},
+          {role:'user', text:`algo em torno de 350 mil`},
+          {role:'ai', text:`Ótimo! Para uma carta de R$350k, as parcelas mensais de consórcio ficam em torno de R$[VALOR] — bem abaixo de um financiamento equivalente. E você pode dar um lance para ser contemplado mais rápido! Posso te enviar uma simulação detalhada agora. Qual seu nome?`},
+        ]
+      }
+    ]
+  },
+
+  delivery: {
+    label: 'Restaurante Delivery',
+    faq: [
+      [`Qual o horário de funcionamento?`, `Funcionamos [HORÁRIO]. Pedidos realizados fora desse horário serão processados na abertura do dia seguinte!`],
+      [`Qual o tempo médio de entrega?`, `Nossa média é de [X] a [X] minutos, dependendo da distância e volume de pedidos. Sempre informamos um prazo realista!`],
+      [`Qual a área de entrega?`, `Entregamos em [BAIRROS/RAIO]. Quer saber se chegamos até você? Me passa seu endereço!`],
+      [`Tem taxa de entrega?`, `A taxa varia conforme a distância: [TABELA]. Para pedidos acima de R$[X], a entrega é gratuita!`],
+      [`Como faço um pedido?`, `Pode pedir direto aqui pelo WhatsApp, pelo nosso app, site ou pelos aplicativos de delivery parceiros. Como prefere?`],
+      [`Vocês têm cardápio vegetariano/vegano?`, `Sim! Temos uma linha especial para você. Posso te enviar o cardápio completo agora?`],
+      [`Os ingredientes são frescos?`, `Sempre! Trabalhamos com ingredientes frescos e selecionados. Nossa cozinha prepara tudo na hora do pedido!`],
+      [`Posso personalizar meu pedido?`, `Com certeza! Sem cebola, sem glúten, extra queijo... diga o que precisa na hora do pedido. Fazemos do seu jeito!`],
+      [`Como pagar o pedido?`, `Aceitamos: dinheiro, PIX, cartão de crédito/débito (maquininha na entrega) e pelos apps. PIX é muito rápido!`],
+      [`Vocês têm combos ou promoções?`, `Sim! Temos combos diários e promoções toda semana. Quer que eu te mande o cardápio com as ofertas de hoje?`],
+      [`Posso acompanhar meu pedido?`, `Sim! Te avisamos quando o pedido saiu para entrega. Em breve também pelo nosso app com rastreio em tempo real!`],
+      [`Qual o pedido mínimo?`, `Pedido mínimo é de R$[X]. Abaixo disso, felizmente não conseguimos sair para entrega.`],
+      [`Vocês têm opção sem glúten?`, `Sim! Temos algumas opções sem glúten no cardápio. Posso te enviar a lista completa?`],
+      [`O que fazer se o pedido chegar errado?`, `Pedimos desculpas se isso ocorrer! Me contate imediatamente com foto do pedido e resolvemos com prioridade — reenvio ou crédito.`],
+      [`Vocês entregam em horário de almoço?`, `Sim! Funcionamos no almoço de [HORÁRIO]. Ótimo período para pedir nosso PF do dia!`],
+      [`Posso agendar um pedido?`, `Sim! Pode agendar com antecedência. Ótimo para garantir seu almoço sem pressa. Me passe o horário desejado!`],
+      [`Quais são os pratos mais pedidos?`, `Os campeões são: [LISTA DOS TOP 3]! Posso te mandar o cardápio completo com fotos?`],
+      [`Tem porção individual?`, `Sim! Temos porções individuais, para 2 e família. Para todos os momentos!`],
+      [`Qual é o prato do dia?`, `O prato de hoje é [PRATO DO DIA] por R$[VALOR] — inclui acompanhamentos! Posso incluir no seu pedido?`],
+      [`Aceita cartão alimentação (VR, VA, Alelo)?`, `Aceitamos [LISTA DE CARTÕES]. Confirme na hora do pedido qual cartão você tem!`],
+      [`As embalagens são sustentáveis?`, `Trabalhamos com embalagens [BIODEGRADÁVEIS/RECICLÁVEIS]. Responsabilidade ambiental faz parte dos nossos valores!`],
+      [`Tem sobremesa?`, `Claro! Temos [LISTA DE SOBREMESAS]. O que vai na sobremesa de hoje? `],
+      [`Tem opção low carb?`, `Sim! Temos pratos especialmente montados para dietas low carb. Me peça o cardápio funcional!`],
+      [`Posso pedir por aqui mesmo no WhatsApp?`, `Claro! É só me dizer o que deseja, seu endereço e forma de pagamento. É o jeito mais rápido!`],
+      [`Qual a avaliação de vocês no Google?`, `Temos [X] estrelas no Google com [X] avaliações! Ficamos muito felizes com o carinho dos nossos clientes `],
+      [`Posso retirar no local?`, `Sim! Retirada no local tem [desconto/benefício especial]. Me avise que deixamos tudo pronto para quando chegar!`],
+      [`Vocês têm programa de fidelidade?`, `Sim! A cada [X] pedidos você ganha [BENEFÍCIO]. Vou te cadastrar automaticamente a partir do primeiro pedido!`],
+      [`Qual a quantidade das porções?`, `Nossas porções são bem servidas! [DETALHE ESPECÍFICO]. Se ficar com dúvida, me pergunta sobre o prato específico!`],
+      [`Têm bebidas no cardápio?`, `Sim! Refrigerantes, sucos naturais, água e [ESPECIAIS]. O que vai de bebida?`],
+      [`Como garantir que vou receber no prazo?`, `Fazemos de tudo para cumprir o prazo! Se houver qualquer atraso, te avisamos. E em caso de atraso excessivo, você ganha compensação.`],
+    ],
+    sims: [
+      {
+        title: 'Sim. 1: Primeiro pedido pelo WhatsApp',
+        msgs: [
+          {role:'user', text:`oi, vocês entregam no Bairro X?`},
+          {role:'ai', text:`Oi!  Entregamos sim no Bairro X! Taxa de entrega de R$[X] para essa região. Quer ver nosso cardápio? Posso te mandar agora mesmo com as promoções do dia! `},
+          {role:'user', text:`manda sim`},
+          {role:'ai', text:`[CARDÁPIO EM IMAGEM/TEXTO]. Esse é nosso cardápio do dia! O tempo de entrega é aproximadamente [X] minutos. O que vai no seu pedido? `},
+          {role:'user', text:`quero uma pizza media de calabresa`},
+          {role:'ai', text:`Pizza média de calabresa, R$[X]!  Vai querer mais alguma coisa? Temos bordão recheado por + R$[X]. Para fechar: qual o endereço completo e a forma de pagamento? (PIX, cartão ou dinheiro)`},
+        ]
+      },
+      {
+        title: 'Sim. 2: Cliente com pedido atrasado',
+        msgs: [
+          {role:'user', text:`faz 1 hora que pedi e não chegou nada!!!`},
+          {role:'ai', text:`Oi!  Me desculpe muito por isso, esse atraso não é aceitável! Vou verificar o status do seu pedido agora mesmo. Pode me passar seu nome ou número do pedido?`},
+          {role:'user', text:`nome João, pedi uma pizza`},
+          {role:'ai', text:`João, já localizei seu pedido!  O motoboy saiu há [X] minutos e está a caminho. Previsão de chegada: [X] minutos. Como compensação pelo atraso, vou incluir [BENEFÍCIO] no seu próximo pedido. Muito obrigado pela paciência!`},
+        ]
+      }
+    ]
+  },
+
+  mecanica: {
+    label: 'Oficina Mecânica',
+    faq: [
+      [`Quais serviços vocês oferecem?`, `Oferecemos: revisão geral, troca de óleo, alinhamento, balanceamento, freios, suspensão, motor, câmbio, ar-condicionado, elétrica, diagnóstico computadorizado e muito mais!`],
+      [`Preciso agendar ou posso ir direto?`, `Recomendamos agendamento para garantir atendimento imediato. Mas se vier sem agendamento, faremos o possível para te atender!`],
+      [`Quanto custa uma troca de óleo?`, `Depende do tipo de óleo e do carro. Para um veículo popular com óleo semissintético fica em torno de R$[X]. Me passa o modelo do seu carro que te passo o valor exato!`],
+      [`Vocês pegam qualquer marca de carro?`, `Sim! Atendemos todas as marcas: nacionais, importados, caminhões e motos. Temos equipamentos para todos!`],
+      [`Como funciona o diagnóstico?`, `Usamos scanner computadorizado que lê todos os sistemas do seu carro e identifica falhas. É rápido, preciso e gratuito para quem aprova o serviço!`],
+      [`Vocês fornecem peças ou preciso trazer?`, `Fornecemos as peças! Trabalhamos com peças originais e linha econômica de qualidade. Você escolhe dentro do seu orçamento.`],
+      [`Qual a garantia dos serviços?`, `Todos os serviços têm garantia de [X] meses. Se houver qualquer problema relacionado ao serviço, resolvemos sem custo!`],
+      [`Quanto tempo leva uma revisão geral?`, `Uma revisão completa leva de 3 a 6 horas. Mas te passamos o tempo exato após a avaliação do veículo.`],
+      [`Vocês buscam o carro?`, `Sim! Temos serviço de busca e entrega do veículo [GRATUITO/COM TAXA] para clientes em [RAIO]. Me passa o endereço!`],
+      [`Meu carro está com barulho estranho, o que fazer?`, `Barulhos são sinais que o carro dá! Não ignore. Me conta: onde está o barulho, quando acontece e como é o som? Posso já fazer uma pré-análise.`],
+      [`Qual o prazo para conserto?`, `Depende do serviço. Trocas simples (óleo, filtros) no mesmo dia. Revisões grandes ou peças especiais podem levar 1 a 3 dias. Sempre te avisamos antes!`],
+      [`Como é o pagamento?`, `Aceitamos dinheiro, PIX, cartões de débito e crédito. Serviços acima de R$[X] parcelamos em até [X]x sem juros!`],
+      [`Vocês fazem revisão de fábrica?`, `Sim! Seguimos o protocolo de revisão da montadora. Seu carro fica com a garantia de fábrica intacta!`],
+      [`A luz do motor acendeu, é grave?`, `Pode ou não ser grave — depende do código. Com nosso diagnóstico descobrimos exatamente o que é. Recomendo não ignorar e verificar o quanto antes!`],
+      [`Meu carro está superaquecendo, pode ir até vocês?`, `Superaquecimento é urgente! Se o ponteiro estiver no vermelho, desligue o carro imediatamente. Me passa a localização que oriento o que fazer ou enviamos socorro!`],
+      [`Fazem revisão pré-viagem?`, `Sim! Revisão pré-viagem é fundamental. Cheque freios, pneus, fluidos, filtros, lâmpadas e muito mais. Agende antes da sua viagem!`],
+      [`O orçamento é gratuito?`, `Sim! Orçamento é sempre gratuito e sem compromisso. Você decide se aprova ou não.`],
+      [`Posso acompanhar o serviço?`, `Claro! Temos área de espera confortável. E te mantemos informado sobre o andamento por aqui mesmo!`],
+      [`Vocês trabalham com carros a gás/GNV?`, `Sim! Temos profissionais habilitados para veículos GNV. Instalação, manutenção e ajuste.`],
+      [`Quais fluidos vocês verificam na revisão?`, `Óleo do motor, fluido de freio, direção hidráulica, radiador, câmbio e limpador. Checagem completa!`],
+      [`Meus pneus estão carecas, vocês vendem?`, `Sim! Trabalhamos com pneus de diversas marcas e preços. Me passa o tamanho (está no próprio pneu) que te passo as opções!`],
+      [`Vocês fazem serviço de funilaria e pintura?`, `Sim/Temos parceiros especializados em funilaria e pintura com quem trabalhamos em conjunto.`],
+      [`O que é revisão preventiva?`, `É a manutenção antes do problema aparecer. Troca de peças com desgaste programado para evitar panes maiores e mais caras no futuro!`],
+      [`Meu carro não pega, o que fazer?`, `Primeiro vamos entender o problema: a bateria está ok? O motor gira mas não pega? Ou não gira nada? Me conta os sintomas que já início uma análise!`],
+      [`Vocês fazem socorro mecânico?`, `Sim! Temos [SERVIÇO DE SOCORRO] para emergências. Me passa a localização!`],
+      [`Qual a diferença entre alinhamento e balanceamento?`, `Alinhamento corrige a direção das rodas (o carro puxando para um lado). Balanceamento elimina vibrações no volante. Geralmente fazemos os dois juntos!`],
+      [`Com que frequência devo trocar o óleo?`, `Depende do tipo: convencional a cada 5.000km, semissintético 7.500km, sintético 10.000km. Verifique também o manual do fabricante.`],
+      [`Vocês têm serviço expresso?`, `Sim! Para serviços rápidos como troca de óleo e filtros, temos serviço expresso em até [X] minutos!`],
+      [`Quanto custa a mão-de-obra?`, `A mão-de-obra varia pelo serviço. Sempre informamos separado das peças no orçamento para total transparência.`],
+      [`Quais são os próximos passos para agendar?`, `Simples! Me passa o modelo do carro, ano e o que precisa (ou o problema). Verifico a agenda e já te passo os horários disponíveis!`],
+    ],
+    sims: [
+      {
+        title: 'Sim. 1: Cliente com problema urgente',
+        msgs: [
+          {role:'user', text:`meu carro está fazendo um barulho horrível no freio`},
+          {role:'ai', text:`Oi!  Barulho no freio é sinal de atenção — precisa verificar urgente! Pode ser desgaste das pastilhas (comum e fácil de resolver) ou algo mais sério. Me conta: o barulho é ao frear ou também em movimento? É um rangido ou um batido?`},
+          {role:'user', text:`rangido ao frear, parece aranhando`},
+          {role:'ai', text:`Muito provavelmente são as pastilhas no limite!  Quando isso acontece o metal começa a tocar no disco — quanto antes resolver, melhor (evita trocar os discos também, que é mais caro). Posso encaixar você hoje ainda? Qual o modelo e ano do carro?`},
+        ]
+      },
+      {
+        title: 'Sim. 2: Cliente questionando preço',
+        msgs: [
+          {role:'user', text:`achei o orçamento de vocês mais caro que outra oficina`},
+          {role:'ai', text:`Entendo!  Preço é importante. Me conta: a outra proposta usa o mesmo tipo de peça? (original vs paralela) E a garantia é a mesma? Na nossa proposta usamos [TIPO DE PEÇA] com garantia de [X] meses. Muitas vezes a diferença está exatamente aí — e no final sai mais barato pela durabilidade e segurança.`},
+          {role:'user', text:`não sei os detalhes da outra`},
+          {role:'ai', text:`Exatamente o ponto!  Peço que confirme com eles. Nossa proposta é transparente: [DETALHE DO ORÇAMENTO]. Trabalho sério tem custo justo. Mas posso ver o que consigo negociar para chegar mais próximo — quer que eu verifique?`},
+        ]
+      }
+    ]
+  }
+  ,
+
+  // ─────────────────────────────────────────
+  // NICHO: ADVOCACIA
+  // ─────────────────────────────────────────
+  advocacia: {
+    label: 'Advocacia',
+    faq: [
+      [`Vocês atendem qual área do direito?`, `Atuamos em [AREAS: ex. Direito do Consumidor, Família, Trabalhista, Cível, Criminal...]. Me conta sua situação que te direciono ao advogado mais adequado!`],
+      [`Como funciona o atendimento inicial?`, `Fazemos uma consulta inicial para entender seu caso. A partir daí, o advogado avalia a melhor estratégia jurídica. Quer agendar uma consulta?`],
+      [`A consulta tem custo?`, `[GRATUITA/valor R$ X]. Nela o advogado analisa seu caso e apresenta as possibilidades jurídicas. Sem compromisso de contratação.`],
+      [`Quanto custa contratar um advogado?`, `Os honorários variam conforme a complexidade do caso e a área do direito. Após a consulta, apresentamos uma proposta detalhada e transparente.`],
+      [`Vocês atendem por videochamada ou apenas presencialmente?`, `Atendemos das duas formas! Presencialmente em nosso escritório em [CIDADE], ou por videoconferência para maior praticidade. Qual prefere?`],
+      [`Qual o prazo médio para resolver meu caso?`, `Depende muito da área e da instância. Processos trabalhistas levam em média [X] meses; cível [X] meses. Na consulta o advogado te dá uma estimativa real.`],
+      [`Meu caso tem chances de ganhar?`, `Cada caso é único. O advogado precisa analisar os documentos e fatos antes de qualquer avaliação. Me conta um pouco sobre sua situação?`],
+      [`Vocês cobram mesmo que eu perda o processo?`, `Os honorários são acordados no contrato de prestação de serviços. Em alguns casos trabalhamos com êxito condicionado. Isso é esclarecido na consulta.`],
+      [`O que é honorários de êxito?`, `É quando o advogado recebe um percentual apenas se ganhar a causa. Isso alinha o interesse do advogado ao seu. Verificamos essa possibilidade caso a caso.`],
+      [`Posso parcelar os honorários?`, `Sim! Temos condições de parcelamento. Nosso objetivo é tornar o acesso à justiça viável para você. Me passa mais detalhes e verifico as opções.`],
+      [`Que documentos devo levar para a consulta?`, `Depende do tipo de caso. De forma geral: documentos pessoais (RG, CPF), contratos, notificações, prints de conversas, notas fiscais. Me conta o caso que listo o essencial.`],
+      [`Posso fazer a consulta online?`, `Sim! Por videochamada ou até por aqui mesmo. Me descreva sua situação que o advogado já faz uma análise preliminar.`],
+      [`Vocês atendem pessoas físicas e empresas?`, `Sim, atendemos ambos. Para empresas temos serviços de assessoria jurídica preventiva mensal, que evita problemas antes que virem processos.`],
+      [`O que é assessoria jurídica preventiva?`, `É um acompanhamento jurídico mensal da empresa: análise de contratos, orientação em decisões, revisão de documentos. Muito mais barato do que litigar depois.`],
+      [`Posso continuar meu processo com vocês se já comecei com outro advogado?`, `Sim! É possível fazer a substituição do advogado a qualquer momento durante o processo. Analisamos o caso e te orientamos sobre os próximos passos.`],
+      [`Quanto tempo tenho para entrar com uma ação?`, `Cada direito tem um prazo de prescrição diferente. Ação trabalhista: 2 anos após a demissão. Consumidor: 5 anos. Não arrisque — me conta a situação agora!`],
+      [`Meu ex-patrão não assinou minha carteira, posso processar?`, `Com certeza! Relação de emprego sem registro é crime e gera todos os direitos trabalhistas. Posso te conectar agora com nosso especialista em Direito do Trabalho?`],
+      [`Fui demitido sem justa causa, quais são meus direitos?`, `Você tem direito a: aviso prévio, FGTS + 40% de multa, saldo de salário, 13º proporcional, férias proporcionais + 1/3. Me passa os dados do seu caso para calcular?`],
+      [`Sofri acidente de trabalho, o que fazer?`, `Situação urgente — não deixe passar tempo! Você tem direito a estabilidade, benefício do INSS e possível indenização. Me passa o que aconteceu que encaminho ao especialista.`],
+      [`Quero me divorciar, como funciona?`, `Divórcio consensual (amigável) é mais rápido e barato — pode ser extrajudicial (cartório). Litigioso (sem acordo) vai para a justiça. Me conta a situação para te orientar melhor.`],
+      [`É possível guardar guarda dos filhos?`, `Sim. A guarda compartilhada é a regra no Brasil. A exclusiva é concedida em casos específicos. O advogado de família avalia o melhor caminho para proteger o interesse dos filhos.`],
+      [`Fui cobrado indevidamente, posso processar?`, `Sim! Cobrança indevida gera direito à devolução em dobro + danos morais em muitos casos. Me conta o que aconteceu que o advogado de consumidor analisa agora.`],
+      [`O que é dano moral?`, `É a compensação financeira por sofrimento, humilhação ou violação de direitos causados por outra pessoa ou empresa. O valor é definido pelo juiz com base no caso.`],
+      [`Meu nome está negativado indevidamente, o que faço?`, `Negativação indevida gera indenização por dano moral! O processo é rápido e em muitos casos conseguimos liminar para retirada imediata do nome. Vamos agir agora?`],
+      [`Quero abrir uma empresa, vocês ajudam?`, `Sim! Orientamos na escolha do tipo societário, elaboramos o contrato social, e te protegemos desde o início. Quer saber mais sobre esse serviço?`],
+      [`O que é procuração?`, `É um documento que autoriza alguém a agir em seu nome perante terceiros ou em processos. Elaboramos e reconhecemos firmas. Precisa de uma?`],
+      [`Posso gravar uma conversa como prova?`, `Depende do contexto. Gravações feitas por um dos participantes da conversa são geralmente lícitas. O advogado analisa a legalidade no seu caso específico.`],
+      [`Quanto tempo o advogado leva para responder?`, `Nosso prazo de retorno é de até [X horas/1 dia útil]. Para urgências jurídicas, informe aqui que priorizamos seu atendimento.`],
+      [`Vocês atendem em quais estados?`, `Atuamos principalmente em [ESTADOS]. Para outros estados, verificamos a viabilidade de atuação ou indicamos parceiros de confiança.`],
+      [`Quais são os próximos passos para contratar?`, `Simples: agende uma consulta inicial, o advogado analisa seu caso, recebe a proposta de honorários, e se aprovar, assinamos o contrato e iniciamos os trabalhos. Posso agendar agora?`],
+    ],
+    sims: [
+      {
+        title: 'Sim. 1: Cliente com problema trabalhista',
+        msgs: [
+          {role:'user', text:`Fui mandado embora e meu chefe disse que foi justa causa mas eu nao concordo`},
+          {role:'ai',  text:`Ola! Entendo a situacao — e voce fez bem em buscar orientacao. Justa causa e a demissao mais grave para o empregado, pois voce perde o FGTS e varios direitos. A boa noticia: se ela nao for legalmente fundamentada, e possivel reverter na justica e receber tudo. Me conta: qual foi o motivo alegado pelo seu empregador?`},
+          {role:'user', text:`Ele disse que foi por falta mas eu tinha atestado medico`},
+          {role:'ai',  text:`Atestado medico valida a ausencia — justa causa por falta nesse caso e praticamente indefensavel para o empregador! Voce tem direito a reversao e a todos os verbas rescisórias. Nosso especialista em Direito do Trabalho pode analisar seu caso com urgencia. Posso agendar uma consulta para voce hoje ainda?`},
+        ]
+      },
+      {
+        title: 'Sim. 2: Cliente com nome negativado indevidamente',
+        msgs: [
+          {role:'user', text:`Meu nome foi negativado por uma conta que eu nao reconheco, o que eu faco?`},
+          {role:'ai',  text:`Isso e muito sério — e infelizmente comum. Negativacao indevida gera dano moral e voce tem direito a indenizacao! O processo e rapido: conseguimos em muitos casos uma liminar judicial para retirar seu nome do SPC/Serasa em poucos dias enquanto o processo corre. Me passa: voce ja tentou contestar diretamente com a empresa que negativou?`},
+          {role:'user', text:`Tentei mas eles disseram que a divida e minha`},
+          {role:'ai',  text:`Perfeito — isso fortalece ainda mais o seu caso. Se voce nao reconhece a divida, pode ser fraude ou erro. Nossa equipe de Direito do Consumidor entra com a acao e busca a indenizacao por dano moral + retirada imediata do nome. Posso te conectar com o advogado agora para uma analise rapida?`},
+        ]
+      },
+      {
+        title: 'Sim. 3: Cliente precisando de divorcio',
+        msgs: [
+          {role:'user', text:`Quero me divorciar mas meu marido nao quer assinar, como fica?`},
+          {role:'ai',  text:`Entendo — situacao delicada, mas voce tem todo o direito de se divorciar mesmo sem o consentimento dele. Nesse caso e o divorcio litigioso, que tramita na justica. Voce nao precisa da assinatura dele para dar inicio. Me conta: voce tem filhos menores? Isso vai definir os proximos passos.`},
+          {role:'user', text:`Tenho dois filhos de 8 e 10 anos`},
+          {role:'ai',  text:`Com filhos menores, alem do divorcio, definimos guarda, pensao alimenticia e regras de visita. Nossa advogada de Familia cuida de tudo protegendo voce e as criancas do inicio ao fim. Posso agendar uma consulta confidencial para esta semana?`},
+        ]
+      }
+    ]
+  },
+
+  // ─────────────────────────────────────────
+  // NICHO: ODONTOLOGIA
+  // ─────────────────────────────────────────
+  odonto: {
+    label: 'Clínica Odontológica',
+    faq: [
+      [`Quais tratamentos vocês oferecem?`, `Oferecemos: clareamento dental, aparelho ortodontico, implante, protese, tratamento de canal, restauracao, limpeza, extracao, harmonizacao orofacial e muito mais! O que voce precisa?`],
+      [`Vocês atendem por plano ou particular?`, `Atendemos [PLANOS ACEITOS] e particular. Me passa qual plano voce tem e verifico a cobertura agora!`],
+      [`Quanto custa um implante dental?`, `O implante varia conforme a marca, numero de implantes e necessidade de enxerto osseo. Na avaliacao gratuita o dentista apresenta o orcamento exato. Quer agendar?`],
+      [`Quanto custa o aparelho?`, `Temos opcoes de aparelho metalico convencional, estetico (resina ou porcelana) e invisalign. Os valores variam de R$ [X] a R$ [X]. Na avaliacao definimos o melhor para voce!`],
+      [`O tratamento de canal dói?`, `Com a anestesia moderna, o tratamento de canal e indolor! A maioria dos pacientes se surpreende com o conforto. E muito menos desconfortavel do que continuar com a dor de dente.`],
+      [`Quanto tempo dura o clareamento?`, `O clareamento de consultorio leva 1 a 2 sessoes de 1h. O resultado dura de 1 a 3 anos com boa manutencao. Quer saber mais sobre o processo?`],
+      [`Atendem criancas?`, `Sim! Temos atendimento odontopediatrico especializado, com ambiente acolhedor para que a crianca se sinta segura e confortavel.`],
+      [`Preciso de raio-x para consulta?`, `Para muitos procedimentos sim. Se voce nao tiver, realizamos no proprio consultorio. Ja incluso na avaliacao inicial!`],
+      [`O clareamento prejudica o esmalte?`, `O clareamento realizado por profissional e seguro e nao prejudica o esmalte quando feito corretamente. Usamos produtos certificados e monitoramos todo o processo.`],
+      [`Qual a diferença entre faceta e lente de contato dental?`, `A lente e mais fina e conservadora (remove menos esmalte). A faceta e indicada para casos que precisam de maior correcao estetica. O dentista avalia qual e ideal para voce!`],
+      [`Implante tem garantia?`, `Sim! Os implantes que realizamos tem garantia de [X anos]. Trabalhamos com marcas certificadas de alto padrao de osseointegracao.`],
+      [`Quantas sessoes de clareamento preciso?`, `Para clareamento de consultorio, geralmente 1 a 2 sessoes. Para o caseiro (moldeira), 2 a 3 semanas de uso. O dentista define o protocolo ideal no seu caso.`],
+      [`Posso fazer implante mesmo sem osso suficiente?`, `Muitas vezes sim! Existe o enxerto osseo que prepara o local para o implante. O dentista avalia por meio de tomografia se e necessario e viavelˆ`],
+      [`Qual a durabilidade do aparelho invisivel?`, `O Invisalign e removivel e praticamente invisivel. A duracao do tratamento varia de 6 meses a 2 anos dependendo do caso. Ideal para quem quer estetica durante o tratamento!`],
+      [`Vocês fazem botox e harmonizacao orofacial?`, `Sim! A harmonizacao orofacial e realizada por dentistas habilitados e inclui botox, preenchimento, bichectomia e rinomodelacao. Agende uma avaliacao para saber o que e indicado para voce!`],
+      [`Meu dente esta mole, o que pode ser?`, `Dente mole pode indicar doenca periodontal (problema na gengiva e no osso). E urgente — quanto antes tratar, maior a chance de salvar o dente. Posso encaixar voce ainda esta semana?`],
+      [`Estou com dor de dente, consigo atendimento rapido?`, `Dor de dente e urgencia! Me avisa sua disponibilidade que priorizamos seu encaixe na agenda. Nao deixe a dor aumentar!`],
+      [`Quanto tempo dura um implante?`, `Com os cuidados corretos, implantes duram a vida toda! A osseointegração torna o implante parte do seu corpo. E o tratamento mais duradouro para substituir dentes perdidos.`],
+      [`Aceita cartao de credito e parcela?`, `Sim! Aceitamos todos os cartoes e parcelamos em ate [X]x sem juros. Para tratamentos maiores temos condicoes especiais. Me passa o tratamento de interesse que verifico!`],
+      [`Vou sentir dor depois do procedimento?`, `Alguns procedimentos podem gerar leve desconforto por 24 a 48 horas, controlado com analgesico. O dentista passa todas as orientacoes de pos-operatorio. Sem sustos!`],
+      [`Como funcionam as profilaxias (limpeza)?`, `A limpeza profissional remove calculo e placa que a escovacao nao alcanca. Recomendamos a cada 6 meses. Inclui exame clinico e orientacoes de higiene!`],
+      [`Tenho medo de dentista, como voces lidam com isso?`, `Somos especializados em atendimento de pacientes ansiosos! Trabalhamos com anestesia eficaz, musica, comunicacao constante e no seu ritmo. Voce vai se surpreender!`],
+      [`Vocês fazem extracao de siso?`, `Sim! Extracao de siso (dente do juizo) e um dos procedimentos mais comuns. Avaliamos por raio-x e fazemos com toda a seguranca e conforto.`],
+      [`Meu filho precisa de aparelho, com que idade começa?`, `O acompanhamento ortodontico pode comecar a partir dos 7 anos para interceptar problemas enquanto a boca ainda esta em desenvolvimento. Agende uma avaliacao gratuita para ele!`],
+      [`O tratamento de canal salva o dente?`, `Na grande maioria dos casos sim! O tratamento de canal remove a infeccao e permite manter o dente por muitos anos. Muito melhor do que a extracao quando e possivel salvar.`],
+      [`Quanto tempo dura uma consulta normal?`, `Consultas de rotina e limpeza levam cerca de 1 hora. Procedimentos maiores podem durar mais — sempre te avisamos antes. Te respeito o seu tempo!`],
+      [`Voces tem estacionamento?`, `Sim! Temos [estacionamento proprio/parceiro] para facilitar sua visita. Nossa clinica e de facil acesso em [ENDERECO].`],
+      [`Posso agendar para minha familia toda?`, `Com prazer! Atendemos todas as idades. Me passa quantas pessoas e o que cada um precisa que verifico os melhores horarios para nao precisarem vir em dias diferentes.`],
+      [`Qual a diferença entre restauracao e coroa?`, `A restauracao (obturacao) repara parte do dente danificado. A coroa cobre o dente inteiro quando nao ha estrutura suficiente para restaurar. O dentista indica o mais adequado!`],
+      [`Quais os proximos passos para comecar?`, `Simples! Agende sua avaliacao gratuita. O dentista examina, tira raio-x se necessario, apresenta o diagnostico e o plano de tratamento. Sem compromisso e sem pressao. Qual dia funciona melhor?`],
+    ],
+    sims: [
+      {
+        title: 'Sim. 1: Cliente com dor de dente urgente',
+        msgs: [
+          {role:'user', text:`Ola, estou com uma dor de dente horrivel faz 2 dias`},
+          {role:'ai',  text:`Ola! Dor de dente forte por 2 dias e urgencia — precisa de atendimento o quanto antes para evitar que o problema evolua para algo mais serio (abscesso, por exemplo). Conseguimos te encaixar ainda hoje ou amanha de manha. Qual horario funciona melhor para voce?`},
+          {role:'user', text:`Amanha de manha seria perfeito`},
+          {role:'ai',  text:`Perfeito! Vou verificar nossos primeiros horarios de amanha. Me passa seu nome completo para reservar a vaga. E se a dor intensificar hoje, me avisa — temos orientacoes de emergencia para aliviar ate a consulta.`},
+        ]
+      },
+      {
+        title: 'Sim. 2: Cliente querendo clareamento',
+        msgs: [
+          {role:'user', text:`Quero clarear meus dentes, quanto custa?`},
+          {role:'ai',  text:`Ola! Clareamento dental e um dos tratamentos que mais transforma o sorriso rapidamente. O valor varia conforme o metodo: consultorio (resultado imediato em 1 a 2 sessoes) ou caseiro (moldeira personalizada, 2 a 3 semanas). Para te passar um valor preciso, preciso saber a condicao atual dos seus dentes. Ja fez algum tratamento recentemento ou tem restauracoes na frente?`},
+          {role:'user', text:`Nao tenho restauracao nao, meu dente e natural`},
+          {role:'ai',  text:`Otimo! Dentes naturais sem restauracoes respondem muito bem ao clareamento. O resultado pode ser de 4 a 8 tons mais claros. O valor para o clareamento de consultorio fica em torno de R$ [VALOR]. Posso agendar uma avaliacao rapida (30 min, gratuita) para o dentista confirmar que voce e candidato ideal e ja sair com a consulta marcada?`},
+        ]
+      },
+      {
+        title: 'Sim. 3: Pai agendando para o filho',
+        msgs: [
+          {role:'user', text:`Meu filho tem 9 anos e a pediatra disse que ele precisa ver um dentista, voces atendem criancas?`},
+          {role:'ai',  text:`Sim! Atendemos criancas com muito carinho e paciencia. Nossa equipe e treinada para deixar os pequenos a vontade, sem trauma. Para 9 anos, uma avaliacao ortodontica preventiva e otima ideia — a gente identifica se precisara de aparelho mais cedo e evita tratamentos mais complexos no futuro. Qual o nome do seu filho e qual dia da semana e melhor para voce?`},
+          {role:'user', text:`Ele se chama Pedro, melhor seria numa quinta ou sexta`},
+          {role:'ai',  text:`Perfeito! Tenho vagas nas proximas quintas e sextas a partir das [HORARIO]. Posso reservar o Pedro para a proxima [dia]? A consulta inicial e gratuita e dura cerca de 40 minutos.`},
+        ]
+      }
+    ]
+  },
+
+  // ─────────────────────────────────────────
+  // NICHO: ACADEMIA / PERSONAL TRAINER
+  // ─────────────────────────────────────────
+  academia: {
+    label: 'Academia & Personal',
+    faq: [
+      [`Quais modalidades vocês oferecem?`, `Oferecemos: musculacao, funcional, crossfit, yoga, pilates, spinning, zumba, natacao, lutas e personal trainer. Qual modalidade te interessa?`],
+      [`Quanto custa a mensalidade?`, `Temos planos a partir de R$ [X]/mes. Quanto maior o periodo contratado, maior o desconto! Me conta qual modalidade voce quer e preparo as opcoes ideais.`],
+      [`O personal trainer e incluso no plano?`, `O personal e um servico adicional com atendimento individualizado. Temos planos a partir de R$ [X] por sessao ou pacotes mensais com melhor custo. Vale muito o investimento!`],
+      [`Posso fazer avaliacao fisica antes de comecar?`, `Sim! Toda matricula inclui avaliacao fisica completa: composicao corporal, medidas, testes de forca e resistencia. Montamos seu treino com base no seu perfil!`],
+      [`Voces tem aulas para iniciantes?`, `Com certeza! Nossos professores sao especializados em receber iniciantes. Voce nao precisa ter nenhuma experiencia previa — comecarmos do zero com seguranca e evolucao garantida.`],
+      [`Quantas vezes por semana preciso treinar?`, `Para resultados consistentes, recomendamos de 3 a 5 vezes por semana. Mas qualquer frequencia e melhor do que nenhuma! O professor monta o plano conforme sua disponibilidade.`],
+      [`Tem estacionamento?`, `Sim! Temos [estacionamento proprio/parceiro] gratuito. Nossa unidade fica em [ENDERECO], de facil acesso.`],
+      [`Funciona em feriados?`, `Funcionamos em quase todos os feriados com horario reduzido. Publicamos o calendario no nosso Instagram/grupos. Quer ser adicionado ao grupo de avisos?`],
+      [`Posso congelar minha matricula?`, `Sim! Permitimos [X] congelamentos por ano em casos de viagem, doenca ou outros imprevistos. Me conta a situacao e verifico as regras do seu plano.`],
+      [`Tem plano familiar ou para casais?`, `Temos descontos especiais para duplas e famílias! Falar comigo agora para calcular o plano que mais vai valer a pena para voces.`],
+      [`Voces oferecem acompanhamento nutricional?`, `Temos parceria com nutricionista [dentro da propria academia / indicacao de parceiro]. Dieta + treino = resultado acelerado. Quer saber mais?`],
+      [`Posso experimentar antes de assinar?`, `Sim! Oferecemos [aula experimental gratuita / semana experimental por R$ X]. Venha conhecer o espaco e sentir nossa metodologia sem compromisso!`],
+      [`Qual o horario de funcionamento?`, `Funcionamos de [HORARIO SEG-SEX] e [HORARIO SAB/DOM]. Temos turmas distribuidas ao longo do dia para encaixar na sua rotina!`],
+      [`Tem vestiario e armarios?`, `Sim! Vestiarios masculino e feminino com chuveiros, armarios com cadeado e toda a estrutura para voce chegar ou sair direto do trabalho.`],
+      [`Eu nunca fiz academia na vida, e normal ter medo?`, `Super normal! A grande maioria dos nossos alunos iniciou sem nunca ter pisado em academia. Nosso ambiente e acolhedor e livre de julgamentos. Voce vai se sentir em casa rapidinho.`],
+      [`Voces trabalham com alguma metodologia especifica?`, `Sim! Utilizamos [METODOLOGIA] com periodizacao de treino e acompanhamento continuo de evolucao. Nao e so levantar peso — e ciencia aplicada ao seu corpo!`],
+      [`Consigo emagrecer em quanto tempo?`, `Depende da frequencia, intensidade e alimentacao. Alunos que combinam treino 3x semana + dieta adequada ja veem resultados em 30 a 60 dias. O que importa e comecar! Posso te mostrar alguns resultados dos nossos alunos?`],
+      [`Posso treinar mesmo com problema de saude?`, `Com atestado medico liberando, sim! Nossos professores sao treinados para adaptar os exercicios a diversas condicoes — hipertensao, diabetes, lesoes, etc.`],
+      [`Tem aula especifica para mulheres?`, `Sim! Temos turmas e modalidades voltadas ao publico feminino, com foco em [GLÚTEOS, FUNCIONAL, YOGA etc.]. Ambiente confortavel e sem intimidacao.`],
+      [`O personal trainer e o mesmo todo mes?`, `Sim! Voce tera um personal fixo que acompanha sua evolucao e conhece seu corpo. Isso faz toda a diferenca nos resultados a longo prazo.`],
+      [`Posso cancelar meu plano?`, `Sim, respeitando as regras contratuais. Planos mensais tem cancelamento mais flexivel. Para planos anuais, verificamos as condicoes. Me conta a situacao!`],
+      [`Que equipamentos voces tem?`, `Temos equipamentos [MARCAS] de alta qualidade: area de musculacao completa, cardio, area funcional, pesos livres, [OUTROS]. Tudo bem mantido e higienizado.`],
+      [`Tem WiFi na academia?`, `Sim! WiFi de alta velocidade disponivel para todos os alunos. Pode conectar seu fone e treinar com sua playlist favorita!`],
+      [`Voces dao suplemento na matricula?`, `Temos [parceria com loja de suplementos / kit de boas-vindas incluso]. Me conta mais sobre seu objetivo que te oriento sobre o que faz sentido ou nao usar.`],
+      [`Tem avaliacao postural?`, `Sim! Nossa avaliacao fisica inclui analise postural. Isso e fundamental para montar treinos que corrijam desequilibrios e evitem lesoes.`],
+      [`Posso treinar gravida?`, `Com liberacao medica, sim! Temos professores com especializacao em gestantes. A atividade fisica na gravidez, quando bem orientada, e muito benefica.`],
+      [`Como funciona o app ou sistema de treino?`, `Usamos [APP/SISTEMA] onde voce acessa seu treino, acompanha a evolucao, ve videos dos exercicios e se comunica com o professor. Tudo na palma da mao!`],
+      [`Tem aula de natacao para adultos?`, `Sim! Atendemos adultos iniciantes e avancados. A natacao e um dos exercicios mais completos — trabalha corpo todo com baixo impacto articular.`],
+      [`Voces tem crossfit?`, `Temos [crossfit proprio / area funcional de alta intensidade]. As turmas sao pequenas para garantir seguranca e atencao individualizada em cada WOD!`],
+      [`Quais sao os proximos passos para me matricular?`, `Simples! Venha pessoalmente ou me passa seus dados aqui. Em 5 minutos ja te matriculo, agendar sua avaliacao fisica e voce ja pode comecar hoje mesmo se quiser! Qual e o seu nome?`],
+    ],
+    sims: [
+      {
+        title: 'Sim. 1: Cliente querendo emagrecer',
+        msgs: [
+          {role:'user', text:`Ola, quero comecar a malhar pra emagrecer mas nunca fui em academia`},
+          {role:'ai',  text:`Ola! Que decisao incrivel — e voce veio ao lugar certo! Iniciantes sao nosso forte. Sem julgamento, sem pressao, no seu ritmo. Para te indicar a melhor modalidade, me conta: voce prefere treino mais intenso (musculacao, funcional) ou algo mais suave pra comecar (yoga, pilates, caminhada na esteira)?`},
+          {role:'user', text:`Prefiro algo mais leve pra comecar e ir pegando o ritmo`},
+          {role:'ai',  text:`Perfeito! Te indico comecar com musculacao leve com acompanhamento de personal + 2x de aula funcional por semana. Essa combinacao e excelente para emagrecer e criar o habito sem exagerar no inicio. Temos um plano especial para quem esta comecando: [VALOR/MES] com avaliacao fisica gratuita inclusa. Posso te contar mais detalhes?`},
+        ]
+      },
+      {
+        title: 'Sim. 2: Cliente perguntando sobre personal trainer',
+        msgs: [
+          {role:'user', text:`Qual a diferenca de ir na academia normal e contratar um personal?`},
+          {role:'ai',  text:`Otima pergunta! Na academia normal, voce tem acesso ao espaco e as aulas coletivas — otimo para manter a frequencia. Com personal, voce tem treino 100% personalizado para seu corpo e objetivo, correcao de execucao em tempo real (evita lesao!), e evolucao muito mais rapida — porque tudo e feito pra voce, nao pra um grupo generico. Para quem quer resultado em menos tempo, o personal vale muito o investimento. Qual e o seu objetivo principal?`},
+          {role:'user', text:`Quero ganhar massa muscular rapido`},
+          {role:'ai',  text:`Para hipertrofia acelerada, o personal e o caminho certo! Ele vai periodizar seu treino, controlar a sobrecarga progressiva e adaptar conforme sua recuperacao. Nossos alunos com personal ganham massa de 2 a 3x mais rapido do que treinando sozinhos. Posso te agendar uma sessao experimental gratuita com um dos nossos personais para voce conhecer a metodologia?`},
+        ]
+      },
+      {
+        title: 'Sim. 3: Cliente indeciso sobre plano anual',
+        msgs: [
+          {role:'user', text:`Fiquei com medo de pagar o ano e nao ir`},
+          {role:'ai',  text:`Entendo completamente — e uma preocupacao real! Mas sabia que exatamente por isso o plano anual funciona melhor para a maioria? O compromisso financeiro cria um gatilho de responsabilidade que faz as pessoas irem muito mais. Alem disso, nossa metodologia de acompanhamento mensal e grupos de motivacao ajudam a manter a frequencia. E ainda assim, se surgir algum imprevisto, voce pode congelar a matricula. Quer que eu calcule quanto voce economiza no anual vs mensalidade?`},
+          {role:'user', text:`Pode calcular sim`},
+          {role:'ai',  text:`No plano mensal voce pagaria R$ [VALOR] x 12 = R$ [TOTAL ANO]. No plano anual voce paga R$ [VALOR ANUAL], economizando R$ [ECONOMIA] — ou seja, [X] meses praticamente de graca! E ainda ganha [BONUS: avaliacao, camiseta, sessao de personal...]. Faz sentido? Posso reservar sua vaga agora com condicoes especiais de hoje!`},
+        ]
+      }
+    ]
+  }
+
+};
+
+
+
+
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let currentNicho = null;
+let currentStep  = 0;
+
+// ══════════════════════════════════════════════
+// NICHO ICONS MAP (for nav label)
+// ══════════════════════════════════════════════
+const NICHO_ICONS = {
+  imoveis:   'ic-building',
+  estetica:  'ic-face',
+  solar:     'ic-sun',
+  seguros:   'ic-shield',
+  delivery:  'ic-pizza',
+  mecanica:  'ic-wrench',
+  advocacia: 'ic-gavel',
+  odonto:    'ic-tooth',
+  academia:  'ic-dumbbell'
+};
+
+// ══════════════════════════════════════════════
+// NICHO SELECT
+// ══════════════════════════════════════════════
+function selectNicho(n) {
+  currentNicho = n;
+  document.querySelectorAll('.nicho-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('n-' + n).classList.add('active');
+}
+
+function startApp() {
+  if (!currentNicho) {
+    showToast('Selecione um nicho primeiro!', 'warn');
+    return;
+  }
+  document.getElementById('hero-section').style.display = 'none';
+  const app = document.getElementById('app');
+  app.classList.add('visible');
+  document.getElementById('nav-nicho-label').textContent = NICHOS[currentNicho].label;
+  buildFAQ();
+  buildSims();
+  goStep(0);
+}
+
+function goBack() {
+  document.getElementById('hero-section').style.display = '';
+  document.getElementById('app').classList.remove('visible');
+  currentNicho = null;
+  document.querySelectorAll('.nicho-card').forEach(c => c.classList.remove('active'));
+}
+
+// ══════════════════════════════════════════════
+// STEP NAVIGATION
+// ══════════════════════════════════════════════
+function goStep(n) {
+  document.querySelectorAll('.step-section').forEach((s, i) => {
+    s.classList.toggle('active', i === n);
+  });
+  document.querySelectorAll('.step-pill').forEach((p, i) => {
+    p.classList.toggle('active', i === n);
+  });
+  currentStep = n;
+  const pct = Math.round((n / 7) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ══════════════════════════════════════════════
+// BUILD FAQ
+// ══════════════════════════════════════════════
+function buildFAQ() {
+  const container = document.getElementById('faq-container');
+  const faqs = NICHOS[currentNicho].faq;
+  container.innerHTML = '';
+  faqs.forEach((faq, i) => {
+    const div = document.createElement('div');
+    div.className = 'faq-item';
+    div.innerHTML = `
+      <div class="faq-q" onclick="toggleFAQ(${i})">
+        <span style="display:flex;align-items:center;gap:10px;">
+          <span class="faq-num">${String(i + 1).padStart(2, '0')}</span>
+          <span>${faq[0]}</span>
+        </span>
+        <svg class="faq-arrow" width="16" height="16"><use href="#ic-chevron-down"/></svg>
+      </div>
+      <div class="faq-a">
+        <textarea id="faq-a-${i}">${faq[1]}</textarea>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function toggleFAQ(i) {
+  const items = document.querySelectorAll('.faq-item');
+  items[i].classList.toggle('open');
+}
+
+// ══════════════════════════════════════════════
+// BUILD SIMULATIONS
+// ══════════════════════════════════════════════
+function buildSims() {
+  const container = document.getElementById('sims-container');
+  const sims = NICHOS[currentNicho].sims;
+  container.innerHTML = '';
+
+  sims.forEach(sim => {
+    const div = document.createElement('div');
+    div.className = 'chat-sim';
+
+    const msgs = sim.msgs.map(m => {
+      const isUser = m.role === 'user';
+      const avatarSvg = isUser
+        ? `<svg width="15" height="15" style="color:var(--text3)"><use href="#ic-user"/></svg>`
+        : `<svg width="15" height="15" style="color:white"><use href="#ic-bot"/></svg>`;
+      return `
+        <div class="chat-msg ${m.role}">
+          <div class="chat-avatar-sm">${avatarSvg}</div>
+          <div class="chat-content">
+            <div class="chat-label">${isUser ? 'Cliente' : 'IA Atendente'}</div>
+            <div class="chat-bubble">${m.text}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    div.innerHTML = `
+      <div class="chat-sim-header">
+        <div class="chat-sim-avatar">
+          <svg width="18" height="18" style="color:white"><use href="#ic-whatsapp"/></svg>
+        </div>
+        <div>
+          <div class="chat-sim-title">${sim.title}</div>
+          <div class="chat-sim-sub">Simulação de atendimento real</div>
+        </div>
+      </div>
+      <div class="chat-sim-body">${msgs}</div>`;
+
+    container.appendChild(div);
+  });
+}
+
+// ══════════════════════════════════════════════
+// GERAR PROMPT
+// ══════════════════════════════════════════════
+function gerarPrompt() {
+  const v = id => (document.getElementById(id) && document.getElementById(id).value) || '[PREENCHER]';
+  const nicho = NICHOS[currentNicho];
+
+  const faqs = nicho.faq.map((faq, i) => {
+    const ans = document.getElementById(`faq-a-${i}`) ? document.getElementById(`faq-a-${i}`).value : faq[1];
+    return `P${i + 1}: ${faq[0]}\nR: ${ans}`;
+  }).join('\n\n');
+
+  const simsText = nicho.sims.map(sim => {
+    const msgs = sim.msgs.map(m => `  [${m.role === 'user' ? 'CLIENTE' : 'IA'}]: ${m.text}`).join('\n');
+    return `--- ${sim.title} ---\n${msgs}`;
+  }).join('\n\n');
+
+  const prompt = `
+================================================================================
+   PROMPT DE TREINAMENTO — IA DE ATENDIMENTO WHATSAPP
+   Nicho: ${nicho.label} | Gerado em: ${new Date().toLocaleString('pt-BR')}
+================================================================================
+
+BLOCO 1 — IDENTIDADE E APRESENTAÇÃO DA EMPRESA
+--------------------------------------------------------------------------------
+
+Você é ${v('f-nome-ia')}, assistente virtual especializada da empresa ${v('f-nome')},
+localizada em ${v('f-cidade')}.
+
+SOBRE A EMPRESA:
+${v('f-sobre')}
+
+SERVICOS OFERECIDOS:
+${v('f-servicos')}
+
+DIFERENCIAIS:
+${v('f-diferenciais')}
+
+CONTATO:
+- WhatsApp: ${v('f-whats')}
+- Site/Instagram: ${v('f-site')}
+- Horario de Atendimento Humano: ${v('f-horario')}
+- Responsavel pelos leads: ${v('f-responsavel')}
+
+TOM DE COMUNICACAO: ${v('f-tom')}
+SAUDACAO PADRAO: "${v('f-saudacao')}"
+
+
+BLOCO 2 — REGRAS ABSOLUTAS DE COMPORTAMENTO
+--------------------------------------------------------------------------------
+
+QUANDO TRANSFERIR PARA HUMANO:
+${v('r-transferir')}
+
+COMO AGIR COM CLIENTE FRIO:
+${v('r-frio')}
+
+COMO AGIR COM CLIENTE INTERESSADO:
+${v('r-interessado')}
+
+COMO AGIR COM CLIENTE IRRITADO:
+${v('r-irritado')}
+
+COMO CONDUZIR AO FECHAMENTO:
+${v('r-fechamento')}
+
+
+BLOCO 3 — MENSAGENS PRONTAS E TEMPLATES
+--------------------------------------------------------------------------------
+
+[SAUDACAO INICIAL — HORARIO COMERCIAL]
+${v('m-saudacao1')}
+
+[SAUDACAO INICIAL — FORA DO HORARIO]
+${v('m-saudacao2')}
+
+[RESPOSTA QUANDO PERGUNTAM O PRECO]
+${v('m-preco')}
+
+[RESPOSTA QUANDO PEDEM MAIS INFORMACOES]
+${v('m-infos')}
+
+[RESPOSTA QUANDO CLIENTE DIZ "VOU PENSAR"]
+${v('m-pensar')}
+
+[QUEBRA DE OBJECAO: "ESTA CARO"]
+${v('m-caro')}
+
+[QUEBRA DE OBJECAO: "NAO TENHO TEMPO"]
+${v('m-tempo')}
+
+[QUEBRA DE OBJECAO: "JA TENHO OUTRO FORNECEDOR"]
+${v('m-concorrente')}
+
+[FOLLOW-UP 24H SEM RESPOSTA]
+${v('m-follow1')}
+
+[FOLLOW-UP 3 DIAS SEM RESPOSTA]
+${v('m-follow2')}
+
+[ENCERRAMENTO POSITIVO]
+${v('m-encer-ok')}
+
+[ENCERRAMENTO NEUTRO]
+${v('m-encer-neu')}
+
+[FRASES HUMANIZANTES]
+${v('m-human')}
+
+
+BLOCO 4 — FAQ: 30 PERGUNTAS E RESPOSTAS
+--------------------------------------------------------------------------------
+
+${faqs}
+
+
+BLOCO 5 — SIMULACOES DE ATENDIMENTO REAL
+--------------------------------------------------------------------------------
+
+${simsText}
+
+
+BLOCO 6 — TECNICAS DE VENDAS E GATILHOS MENTAIS
+--------------------------------------------------------------------------------
+
+COMO USAR URGENCIA:
+${v('t-urgencia')}
+
+COMO USAR ESCASSEZ:
+${v('t-escassez')}
+
+COMO DEMONSTRAR AUTORIDADE:
+${v('t-autoridade')}
+
+COMO USAR PROVA SOCIAL:
+${v('t-prova')}
+
+PERGUNTAS DE COMPROMETIMENTO:
+${v('t-comprometimento')}
+
+TECNICA DE ANCORAGEM DE PRECO:
+${v('t-ancora')}
+
+
+BLOCO 7 — PROIBICOES ABSOLUTAS E LINGUAGEM
+--------------------------------------------------------------------------------
+
+O QUE VOCE NUNCA DEVE FAZER:
+${v('p-proib')}
+
+PALAVRAS E FRASES QUE SOAM ROBOTICAS (NUNCA USE):
+${v('p-robotico')}
+
+PALAVRAS E EXPRESSOES RECOMENDADAS (USE SEMPRE):
+${v('p-humano')}
+
+
+BLOCO 8 — DIRETRIZES DE LINGUAGEM E HUMANIZACAO
+--------------------------------------------------------------------------------
+
+1. Voce e um atendente humano especializado. NUNCA se identifique como IA a menos que o cliente pergunte diretamente.
+2. Use o nome do cliente sempre que souber — cria conexao real.
+3. Escreva em frases curtas — maximo 3 linhas por mensagem no WhatsApp.
+4. Faca UMA pergunta por vez — nao sobrecarregue o cliente.
+5. Sempre termine sua mensagem com uma pergunta ou proximo passo — mantenha o engajamento.
+6. Varie suas respostas — nunca repita a mesma frase em sequencia.
+7. Use contracoes naturais: "to" em vez de "estou", "pra" em vez de "para" (em contexto informal).
+8. Demonstre entusiasmo genuino — nao excessivo.
+9. Valide o que o cliente disse antes de responder — mostra que voce ouviu.
+10. Nunca encerre um atendimento sem oferecer um proximo passo claro e concreto.
+
+
+BLOCO 9 — OBJETIVO FINAL (PRIORIDADE MAXIMA)
+--------------------------------------------------------------------------------
+
+Em CADA interacao, tente atingir UM destes objetivos (em ordem de prioridade):
+
+1. FECHAR VENDA — Se o cliente esta pronto, feche agora.
+2. MARCAR REUNIAO/VISITA/CONSULTA — Se nao esta pronto, agende.
+3. GERAR ORCAMENTO — Se precisa de informacoes, colete e envie.
+4. CAPTAR LEAD — No minimo, obtenha nome + telefone + interesse.
+
+NUNCA encerre um atendimento sem ter atingido pelo menos o objetivo 4.
+SEMPRE ofereca um proximo passo claro e concreto ao cliente.
+SEMPRE crie urgencia real e legitima para que o cliente aja agora.
+
+================================================================================
+   FIM DO PROMPT DE TREINAMENTO
+   Empresa: ${v('f-nome')} | Nicho: ${nicho.label}
+   Gerado em: ${new Date().toLocaleString('pt-BR')}
+================================================================================`.trim();
+
+  const outputEl = document.getElementById('prompt-output');
+  const wrapEl   = document.getElementById('prompt-output-wrap');
+  const copyBar  = document.getElementById('copy-bar');
+  const charCount = document.getElementById('prompt-char-count');
+
+  outputEl.textContent = prompt;
+  wrapEl.classList.add('visible');
+  copyBar.style.display = 'flex';
+  charCount.textContent = `${prompt.length.toLocaleString('pt-BR')} chars`;
+
+  showToast('Prompt gerado com sucesso!', 'ok');
+  setTimeout(() => wrapEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+}
+
+// ══════════════════════════════════════════════
+// COPY / DOWNLOAD
+// ══════════════════════════════════════════════
+function copiarPrompt() {
+  const text = document.getElementById('prompt-output').textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('Prompt copiado para a área de transferência!', 'ok'));
+}
+
+function downloadPrompt() {
+  const text = document.getElementById('prompt-output').textContent;
+  const nome = (document.getElementById('f-nome') && document.getElementById('f-nome').value) || 'minha-empresa';
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `prompt-ia-whatsapp-${nome.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}.txt`;
+  a.click();
+  showToast('Download iniciado!', 'ok');
+}
+
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
+function showToast(msg, type = 'ok') {
+  const t    = document.getElementById('toast');
+  const icon = document.getElementById('toast-icon-svg');
+  document.getElementById('toast-msg').textContent = msg;
+
+  if (type === 'warn') {
+    t.style.borderColor = 'rgba(239,68,68,0.4)';
+    icon.style.color = '#f87171';
+    icon.querySelector('use').setAttribute('href', '#ic-alert');
+  } else {
+    t.style.borderColor = 'rgba(168,85,247,0.4)';
+    icon.style.color = 'var(--accent2)';
+    icon.querySelector('use').setAttribute('href', '#ic-check');
+  }
+
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+</script>
+</body>
+</html>
